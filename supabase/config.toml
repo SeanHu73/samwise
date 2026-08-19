@@ -1,0 +1,4 @@
+project_id = "samwise"
+
+[functions.sync]
+verify_jwt = true
