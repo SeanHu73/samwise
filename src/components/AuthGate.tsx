@@ -26,21 +26,47 @@ export function AuthGate({ children }: { children: ReactNode }) {
 function SignIn() {
   const [email, setEmail] = useState(""),
     [password, setPassword] = useState(""),
-    [message, setMessage] = useState("");
+    [message, setMessage] = useState(""),
+    [busy, setBusy] = useState(false);
+  function validCredentials() {
+    if (!email.trim()) {
+      setMessage("Enter your email address first.");
+      return false;
+    }
+    if (password.length < 6) {
+      setMessage("Use a password with at least six characters.");
+      return false;
+    }
+    return true;
+  }
   async function submit(e: FormEvent) {
     e.preventDefault();
+    if (!validCredentials() || busy) return;
+    setBusy(true);
     setMessage("");
     const { error } = await supabase!.auth.signInWithPassword({
-      email,
+      email: email.trim(),
       password,
     });
     if (error) setMessage(error.message);
+    setBusy(false);
   }
   async function signUp() {
-    const { error } = await supabase!.auth.signUp({ email, password });
+    if (!validCredentials() || busy) return;
+    setBusy(true);
+    setMessage("");
+    const { data, error } = await supabase!.auth.signUp({
+      email: email.trim(),
+      password,
+    });
     setMessage(
-      error ? error.message : "Check your email to confirm your account.",
+      error
+        ? error.message
+        : data.session
+          ? "Account created. Opening Samwise…"
+          : "Account created. Check your email to confirm it.",
     );
+    setBusy(false);
   }
   return (
     <main className="grid min-h-dvh place-items-center bg-cream p-5">
@@ -55,6 +81,8 @@ function SignIn() {
         <label className="mt-6 block text-sm font-semibold">Email</label>
         <input
           type="email"
+          name="email"
+          autoComplete="email"
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -63,6 +91,8 @@ function SignIn() {
         <label className="mt-4 block text-sm font-semibold">Password</label>
         <input
           type="password"
+          name="password"
+          autoComplete="current-password"
           required
           minLength={6}
           value={password}
@@ -70,13 +100,14 @@ function SignIn() {
           className="mt-1 min-h-12 w-full rounded-xl border border-sand px-3"
         />
         {message && <p className="mt-3 text-sm text-clay">{message}</p>}
-        <button className="mt-6 min-h-12 w-full rounded-xl bg-sage font-semibold text-white">
-          Sign in
+        <button disabled={busy} className="mt-6 min-h-12 w-full rounded-xl bg-sage font-semibold text-white disabled:opacity-50">
+          {busy ? "Please wait…" : "Sign in"}
         </button>
         <button
           type="button"
-          onClick={signUp}
-          className="mt-2 min-h-12 w-full rounded-xl border border-sand"
+          disabled={busy}
+          onClick={() => void signUp()}
+          className="mt-2 min-h-12 w-full rounded-xl border border-sand disabled:opacity-50"
         >
           Create account
         </button>
