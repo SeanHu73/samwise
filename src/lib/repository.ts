@@ -36,7 +36,7 @@ const base = (): EntityBase => {
 async function queue(
   type: SyncEntityType,
   value: EntityBase,
-  kind: "create" | "update_fields" = "create",
+  kind: "create" | "update_fields" | "delete" = "create",
   fields: Record<string, unknown> = value as unknown as Record<string, unknown>,
   baseVersion = 0,
 ) {
@@ -199,6 +199,17 @@ export async function saveEntity<T extends EntityBase>(
 }
 export const updateTask = (task: Task, fields: Partial<Task>) =>
   saveEntity("task", db.tasks, task, fields);
+export async function deleteTask(task: Task) {
+  const deletedAt = now(),
+    updated = {
+      ...task,
+      deletedAt,
+      updatedAt: deletedAt,
+      version: task.version + 1,
+    };
+  await db.tasks.put(updated);
+  await queue("task", updated, "delete", {}, task.version);
+}
 export const updateProject = (value: Project, fields: Partial<Project>) =>
   saveEntity("project", db.projects, value, fields);
 export const updateDirection = (value: Direction, fields: Partial<Direction>) =>
@@ -209,6 +220,8 @@ export const updateMilestone = (value: Milestone, fields: Partial<Milestone>) =>
   saveEntity("milestone", db.milestones, value, fields);
 export const updateNote = (value: Note, fields: Partial<Note>) =>
   saveEntity("note", db.notes, value, fields);
+export const updateArea = (value: Area, fields: Partial<Area>) =>
+  saveEntity("area", db.areas, value, fields);
 
 export async function planTask(task: Task, date: string, commitment = false) {
   if (commitment) {

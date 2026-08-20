@@ -57,7 +57,7 @@ export interface Milestone extends EntityBase {
 export interface Task extends EntityBase {
   projectId?: string;
   milestoneId?: string;
-  areaId?: string;
+  areaId?: string | null;
   parentTaskId?: string;
   title: string;
   descriptionMarkdown: string;

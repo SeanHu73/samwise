@@ -2,6 +2,7 @@ import { Check, Clock3, Play } from "lucide-react";
 import type { Task } from "../types";
 import { completeTask, planToday } from "../lib/repository";
 import { Link } from "react-router-dom";
+import { useAreas } from "../hooks/useData";
 export function TaskRow({
   task,
   onDefer,
@@ -11,6 +12,7 @@ export function TaskRow({
   onDefer: (task: Task) => void;
   showPlan?: boolean;
 }) {
+  const area = useAreas().find((item) => item.id === task.areaId);
   return (
     <article className="group rounded-2xl border border-sand bg-white p-4 shadow-sm">
       <div className="flex items-start gap-3">
@@ -23,6 +25,9 @@ export function TaskRow({
         </button>
         <div className="min-w-0 flex-1">
           <h3 className="font-semibold text-ink">{task.title}</h3>
+          {area && (
+            <span className="quiet-label mt-1 inline-block">{area.name}</span>
+          )}
           {task.nextActionText && (
             <p className="mt-1 text-sm text-slate-600">{task.nextActionText}</p>
           )}

@@ -67,6 +67,19 @@ export const useGoals = () =>
     [],
     [],
   );
+export const useAreas = () =>
+  useLiveQuery(
+    () => db.areas.filter((area) => !area.deletedAt).sortBy("name"),
+    [],
+    [],
+  );
+export const useActiveAreas = () =>
+  useLiveQuery(
+    () =>
+      db.areas.filter((area) => !area.deletedAt && area.active).sortBy("name"),
+    [],
+    [],
+  );
 export const useTasks = () =>
   useLiveQuery(() => db.tasks.filter((x) => !x.deletedAt).toArray(), [], []);
 export const useTaskEvents = () =>

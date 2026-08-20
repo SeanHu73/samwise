@@ -14,6 +14,7 @@ import {
 import { db } from "../lib/db";
 import {
   createAgentRun,
+  createArea,
   createAttachment,
   captureTask,
   createDirection,
@@ -25,6 +26,7 @@ import {
   recordReview,
   saveEntity,
   updateDirection,
+  updateArea,
   updateMilestone,
   updateNote,
   updateProject,
@@ -34,6 +36,7 @@ import { fromServerEntity } from "../lib/sync";
 import { durationProfile } from "../lib/duration";
 import { id, todayKey } from "../lib/ids";
 import {
+  useActiveAreas,
   useCalendarEvents,
   useDirections,
   useGoals,
@@ -759,6 +762,8 @@ const Stat = ({ label, value }: { label: string; value: number }) => (
 
 export function Settings() {
   const profile = usePlanningProfile(),
+    areas = useActiveAreas(),
+    [areaName, setAreaName] = useState(""),
     [saved, setSaved] = useState("");
   if (!profile) return null;
   const set = async (fields: Partial<PlanningProfile>) => {
@@ -847,6 +852,55 @@ export function Settings() {
           Reduce decorative scenery
         </label>
       </div>
+      <section className="journey-card mt-5">
+        <h2 className="font-serif text-xl font-bold">Work categories</h2>
+        <p className="mt-1 text-sm text-slate-600">
+          Classify tasks by the part of life they belong to, such as Job Search,
+          Internship, or Personal Projects.
+        </p>
+        <form
+          className="mt-4 flex gap-2"
+          onSubmit={(event) => {
+            event.preventDefault();
+            if (!areaName.trim()) return;
+            void createArea(areaName).then(() => setAreaName(""));
+          }}
+        >
+          <input
+            className="field flex-1"
+            value={areaName}
+            onChange={(event) => setAreaName(event.target.value)}
+            placeholder="Add a category"
+          />
+          <button className="primary" type="submit">
+            Add
+          </button>
+        </form>
+        <div className="mt-4 space-y-2">
+          {areas.map((area) => (
+            <div
+              className="flex min-h-12 items-center justify-between rounded-xl border border-sand bg-white px-3"
+              key={area.id}
+            >
+              <span className="font-semibold">{area.name}</span>
+              <button
+                className="rounded-lg px-3 py-2 text-sm text-clay hover:bg-clay/10"
+                type="button"
+                onClick={() =>
+                  window.confirm(
+                    `Hide “${area.name}”? Existing tasks will keep the category, but it will no longer be available for new tasks.`,
+                  ) && void updateArea(area, { active: false })
+                }
+              >
+                Hide
+              </button>
+            </div>
+          ))}
+          {!areas.length && (
+            <p className="text-sm text-slate-500">No categories yet.</p>
+          )}
+        </div>
+      </section>
       {saved && <p className="mt-3 text-sm text-moss">{saved}</p>}
     </>
   );
