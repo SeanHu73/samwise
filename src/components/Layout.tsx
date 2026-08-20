@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   BarChart3,
   CalendarDays,
@@ -12,6 +12,7 @@ import {
   Settings,
   Sparkles,
   Sun,
+  X,
 } from "lucide-react";
 import { NavLink, Outlet } from "react-router-dom";
 import { Capture } from "./Capture";
@@ -31,7 +32,8 @@ const nav = [
 ] as const;
 export function Layout() {
   const inbox = useInbox(),
-    pending = useOutboxCount();
+    pending = useOutboxCount(),
+    [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
     const run = () => {
@@ -99,6 +101,64 @@ export function Layout() {
       <main className="mx-auto max-w-6xl px-4 pb-28 pt-6 md:ml-72 md:px-8 md:pb-12">
         <Outlet />
       </main>
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 z-50 md:hidden"
+          role="dialog"
+          aria-modal="true"
+        >
+          <button
+            className="absolute inset-0 bg-ink/45"
+            onClick={() => setMobileMenuOpen(false)}
+            aria-label="Close navigation"
+          />
+          <section className="absolute inset-x-3 bottom-[calc(5rem+env(safe-area-inset-bottom))] max-h-[75dvh] overflow-y-auto rounded-3xl border border-parchment-deep bg-parchment p-4 shadow-soft">
+            <div className="mb-3 flex items-center justify-between px-2">
+              <div>
+                <p className="quiet-label">Navigation</p>
+                <h2 className="font-serif text-xl font-bold">Choose a path</h2>
+              </div>
+              <button
+                className="grid size-11 place-items-center rounded-full hover:bg-sand"
+                onClick={() => setMobileMenuOpen(false)}
+                aria-label="Close navigation"
+              >
+                <X size={21} />
+              </button>
+            </div>
+            <nav className="grid gap-2 sm:grid-cols-2">
+              {nav.map(([to, label, Icon]) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={({ isActive }) =>
+                    `flex min-h-12 items-center gap-3 rounded-xl border px-3 text-sm font-semibold ${isActive ? "border-moss bg-moss text-white" : "border-sand bg-white text-ink"}`
+                  }
+                >
+                  <Icon size={19} />
+                  <span>{label}</span>
+                  {label === "Inbox" && !!inbox.length && (
+                    <span className="ml-auto rounded-full bg-ember px-2 text-xs text-white">
+                      {inbox.length}
+                    </span>
+                  )}
+                </NavLink>
+              ))}
+            </nav>
+            <button
+              onClick={() => void syncNow()}
+              className="mt-4 w-full px-2 text-left text-xs text-slate-500"
+            >
+              {navigator.onLine
+                ? pending
+                  ? `${pending} changes travelling`
+                  : "All changes safely kept"
+                : "Saved offline"}
+            </button>
+          </section>
+        </div>
+      )}
       <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-parchment-deep bg-parchment/95 px-2 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
         <MobileLink to="/today" label="Today" Icon={Sun} />
         <MobileLink to="/plan" label="Plan" Icon={CalendarDays} />
@@ -112,7 +172,16 @@ export function Layout() {
           </span>
         </NavLink>
         <MobileLink to="/projects" label="Projects" Icon={FolderKanban} />
-        <MobileLink to="/reviews" label="More" Icon={MoreHorizontal} />
+        <button
+          type="button"
+          onClick={() => setMobileMenuOpen(true)}
+          className="flex min-h-16 flex-col items-center justify-center gap-1 text-xs text-slate-500"
+          aria-expanded={mobileMenuOpen}
+          aria-label="Open navigation"
+        >
+          <MoreHorizontal size={21} />
+          More
+        </button>
       </nav>
     </div>
   );
