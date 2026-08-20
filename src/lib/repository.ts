@@ -278,29 +278,36 @@ export async function logTimer(task: Task, minutes: number) {
   if (minutes > 0) await event(task.id, "actual_time_logged", { minutes });
 }
 
-export async function getPlanningProfile() {
-  const existing = await db.planningProfiles.toCollection().first();
-  if (existing) return existing;
-  const value: PlanningProfile = {
-    ...base(),
-    workDays: [1, 2, 3, 4, 5],
-    preferredWorkWindows: ["09:00-17:00"],
-    dailyFocusMinutes: 240,
-    reservePercent: 20,
-    maximumTodayCommitments: 3,
-    minimumTaskMinutes: 5,
-    preferredFocusSessionMinutes: 25,
-    transitionBufferMinutes: 10,
-    planningDetail: "balanced",
-    breakdownStyle: "mixed",
-    promptTone: "gentle",
-    deadlineBufferDays: 2,
-    weeklyReviewDay: 0,
-    reduceDecoration: false,
-  };
-  await db.planningProfiles.add(value);
-  await queue("planning_profile", value);
-  return value;
+let planningProfileRequest: Promise<PlanningProfile> | undefined;
+export function getPlanningProfile() {
+  if (planningProfileRequest) return planningProfileRequest;
+  planningProfileRequest = (async () => {
+    const existing = await db.planningProfiles.toCollection().first();
+    if (existing) return existing;
+    const value: PlanningProfile = {
+      ...base(),
+      workDays: [1, 2, 3, 4, 5],
+      preferredWorkWindows: ["09:00-17:00"],
+      dailyFocusMinutes: 240,
+      reservePercent: 20,
+      maximumTodayCommitments: 3,
+      minimumTaskMinutes: 5,
+      preferredFocusSessionMinutes: 25,
+      transitionBufferMinutes: 10,
+      planningDetail: "balanced",
+      breakdownStyle: "mixed",
+      promptTone: "gentle",
+      deadlineBufferDays: 2,
+      weeklyReviewDay: 0,
+      reduceDecoration: false,
+    };
+    await db.planningProfiles.add(value);
+    await queue("planning_profile", value);
+    return value;
+  })().finally(() => {
+    planningProfileRequest = undefined;
+  });
+  return planningProfileRequest;
 }
 export async function recordReview(
   kind: PlanningSession["kind"],

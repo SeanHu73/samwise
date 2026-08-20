@@ -1,18 +1,41 @@
 import { useState } from "react";
-import { useLiveQuery } from "dexie-react-hooks";
 import type { Task } from "../types";
-import { useAvailable, useCalendarEvents, useToday } from "../hooks/useData";
+import {
+  useAvailable,
+  useCalendarEvents,
+  usePlanningProfile,
+  useToday,
+} from "../hooks/useData";
 import { TaskRow } from "../components/TaskRow";
 import { DeferDialog } from "../components/DeferDialog";
 import { capacityState, constrainedCapacity } from "../lib/capacity";
-import { getPlanningProfile } from "../lib/repository";
 import { todayKey } from "../lib/ids";
 export function Today() {
   const tasks = useToday(),
-    available = useAvailable(),events=useCalendarEvents(),profile=useLiveQuery(()=>getPlanningProfile(),[],undefined);
+    available = useAvailable(),
+    events = useCalendarEvents(),
+    profile = usePlanningProfile();
   const [defer, setDefer] = useState<Task>();
-  const todayEvents=events.filter(event=>event.startAt.slice(0,10)===todayKey()),busy=todayEvents.reduce((minutes,event)=>minutes+Math.max(0,(new Date(event.endAt).getTime()-new Date(event.startAt).getTime())/60000),0);
-  const usable = constrainedCapacity(profile?.dailyFocusMinutes??240,profile?.reservePercent??20,busy,todayEvents.length*(profile?.transitionBufferMinutes??10)),
+  const todayEvents = events.filter(
+      (event) => event.startAt.slice(0, 10) === todayKey(),
+    ),
+    busy = todayEvents.reduce(
+      (minutes, event) =>
+        minutes +
+        Math.max(
+          0,
+          (new Date(event.endAt).getTime() -
+            new Date(event.startAt).getTime()) /
+            60000,
+        ),
+      0,
+    );
+  const usable = constrainedCapacity(
+      profile?.dailyFocusMinutes ?? 240,
+      profile?.reservePercent ?? 20,
+      busy,
+      todayEvents.length * (profile?.transitionBufferMinutes ?? 10),
+    ),
     planned = tasks.reduce((n, t) => n + (t.estimatedMinutes ?? 30), 0);
   return (
     <>
@@ -27,8 +50,8 @@ export function Today() {
         </p>
         <h1 className="mt-2 text-3xl font-bold">A small plan is enough.</h1>
         <p className="mt-2 text-slate-600">
-          {tasks.length} of {profile?.maximumTodayCommitments??3} commitments · {Math.max(0, usable - planned)}{" "}
-          minutes available ·{" "}
+          {tasks.length} of {profile?.maximumTodayCommitments ?? 3} commitments
+          · {Math.max(0, usable - planned)} minutes available ·{" "}
           <span className="capitalize">{capacityState(planned, usable)}</span>
         </p>
       </header>

@@ -21,7 +21,6 @@ import {
   createMilestone,
   createNote,
   createProject,
-  getPlanningProfile,
   planTask,
   recordReview,
   saveEntity,
@@ -38,6 +37,7 @@ import {
   useCalendarEvents,
   useDirections,
   useGoals,
+  usePlanningProfile,
   useProjects,
   useTaskEvents,
   useTasks,
@@ -758,7 +758,7 @@ const Stat = ({ label, value }: { label: string; value: number }) => (
 );
 
 export function Settings() {
-  const profile = useLiveQuery(() => getPlanningProfile(), [], undefined),
+  const profile = usePlanningProfile(),
     [saved, setSaved] = useState("");
   if (!profile) return null;
   const set = async (fields: Partial<PlanningProfile>) => {
