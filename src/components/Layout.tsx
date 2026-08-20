@@ -22,7 +22,7 @@ const nav = [
   ["/today", "Today", Sun],
   ["/inbox", "Inbox", Inbox],
   ["/plan", "Plan", CalendarDays],
-  ["/projects", "Projects", FolderKanban],
+  ["/projects", "Big Picture", FolderKanban],
   ["/map", "Long-term map", Map],
   ["/reviews", "Reviews", ScrollText],
   ["/insights", "Insights", BarChart3],
@@ -112,7 +112,7 @@ export function Layout() {
             onClick={() => setMobileMenuOpen(false)}
             aria-label="Close navigation"
           />
-          <section className="absolute inset-x-3 bottom-[calc(5rem+env(safe-area-inset-bottom))] max-h-[75dvh] overflow-y-auto rounded-3xl border border-parchment-deep bg-parchment p-4 shadow-soft">
+          <section className="absolute inset-y-0 left-0 w-[min(22rem,88vw)] overflow-y-auto rounded-r-3xl border-r border-parchment-deep bg-parchment p-4 pt-[max(1rem,env(safe-area-inset-top))] shadow-soft">
             <div className="mb-3 flex items-center justify-between px-2">
               <div>
                 <p className="quiet-label">Navigation</p>
@@ -160,18 +160,6 @@ export function Layout() {
         </div>
       )}
       <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-parchment-deep bg-parchment/95 px-2 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
-        <MobileLink to="/today" label="Today" Icon={Sun} />
-        <MobileLink to="/plan" label="Plan" Icon={CalendarDays} />
-        <NavLink
-          to="/inbox"
-          aria-label="Capture"
-          className="grid place-items-center"
-        >
-          <span className="grid size-14 -translate-y-3 place-items-center rounded-full bg-moss text-white shadow-soft">
-            <Plus />
-          </span>
-        </NavLink>
-        <MobileLink to="/projects" label="Projects" Icon={FolderKanban} />
         <button
           type="button"
           onClick={() => setMobileMenuOpen(true)}
@@ -182,6 +170,18 @@ export function Layout() {
           <MoreHorizontal size={21} />
           More
         </button>
+        <MobileLink to="/today" label="Today" Icon={Sun} />
+        <NavLink
+          to="/inbox"
+          aria-label="Capture"
+          className="grid place-items-center"
+        >
+          <span className="grid size-14 -translate-y-3 place-items-center rounded-full bg-moss text-white shadow-soft">
+            <Plus />
+          </span>
+        </NavLink>
+        <MobileLink to="/plan" label="Plan" Icon={CalendarDays} />
+        <MobileLink to="/projects" label="Big Picture" Icon={FolderKanban} />
       </nav>
     </div>
   );

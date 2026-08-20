@@ -2,7 +2,15 @@ import { Check, Clock3, Play } from "lucide-react";
 import type { Task } from "../types";
 import { completeTask, planToday } from "../lib/repository";
 import { Link } from "react-router-dom";
-import { useAreas } from "../hooks/useData";
+import { useAreas, useProjects } from "../hooks/useData";
+const palette = [
+  "#315C4C",
+  "#A75436",
+  "#365A7A",
+  "#765489",
+  "#9A7438",
+  "#44705D",
+];
 export function TaskRow({
   task,
   onDefer,
@@ -12,9 +20,31 @@ export function TaskRow({
   onDefer: (task: Task) => void;
   showPlan?: boolean;
 }) {
-  const area = useAreas().find((item) => item.id === task.areaId);
+  const areas = useAreas(),
+    area = areas.find((item) => item.id === task.areaId),
+    project = useProjects().find((item) => item.id === task.projectId),
+    projectArea = areas.find((item) => item.id === project?.areaId),
+    color = project
+      ? projectArea?.color ||
+        palette[
+          [...project.id].reduce(
+            (total, letter) => total + letter.charCodeAt(0),
+            0,
+          ) % palette.length
+        ]
+      : undefined;
   return (
-    <article className="group rounded-2xl border border-sand bg-white p-4 shadow-sm">
+    <article
+      className={`group rounded-2xl border border-sand bg-white p-4 shadow-sm ${color ? "border-l-4" : ""}`}
+      style={
+        color
+          ? {
+              borderLeftColor: color,
+              background: `color-mix(in srgb, ${color} ${8 + (4 - task.priority) * 4}%, white)`,
+            }
+          : undefined
+      }
+    >
       <div className="flex items-start gap-3">
         <button
           aria-label={`Complete ${task.title}`}

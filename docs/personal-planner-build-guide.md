@@ -209,15 +209,16 @@ task_completed, task_deferred, task_reactivated, task_dropped, task_split, task_
 ### Inbox
 
 - A single always-available capture field.
-- Capture without classification.
-- Processing turns the item into task, project, or reference.
+- Capture asks only for the thought and its user-chosen priority. Do not require a category, date, estimate, or manually written next action.
+- Save locally as an available task immediately, including offline.
+- After saving, run a brief non-blocking AI assessment when online. If the wording is not already actionable, suggest one concrete first physical action; do not expand every capture into a project or interrupt the user with more questions.
+- Older Inbox items retain quick edit and delete controls, but processing asks only for title and priority.
 
 ### Today
 
-- Default screen.
+- Default screen, titled **Daily Mission**.
 - Show 1–3 commitments then a separate list of available next actions.
-- Show estimates against usable capacity.
-- Show concise calendar constraints such as Busy 10–1 or Flight 4:30 PM.
+- Do not show calculated “minutes available” or “N hours busy” summaries in the main daily/weekly interface.
 - Timer, complete, and defer must be one click/tap away.
 - Second deferral opens the decision drawer.
 
@@ -242,11 +243,14 @@ task_completed, task_deferred, task_reactivated, task_dropped, task_split, task_
 - For each direction, a short guided check-in: “What would make this direction meaningfully better by [date]?”, “What is uncertain?”, “What is the next decision or experiment?”
 - Use milestone dates as review prompts unless they are real external deadlines.
 
-### Projects
+### Big Picture
 
-- Purpose and definition of done.
-- Milestones, next action, active tasks, notes, and files.
-- Markdown/rich-text-lite only; no generic block editor.
+- Replace the Projects tab with a colour-coded outcome view called **Big Picture**.
+- Each plan has a primary colour. Milestones and associated short-term tasks inherit that colour; priority may differentiate tasks with lighter or darker hues.
+- New plans begin with an outcome and optional desired completion date. On submission, the AI proposes a reviewable reverse plan of medium-term milestones, short-term tasks, scheduling considerations, and important omissions. It must not add those recommendations automatically.
+- Under the outcome thumbnails, show a six-month overview. Each month summarizes desired outcomes and milestones.
+- Month → week → day is a progressive drill-down: select a month to see its weeks, then a week to see dated tasks on individual days.
+- The detail view supports purpose, definition of done, completion date, dated milestones, and dated/priority-ranked tasks.
 
 ### Reviews
 
@@ -368,7 +372,7 @@ Phone is for _capture, choosing the next action, focusing, and quick recovery_�
 ```text
 ┌─────────────────────────────┐
 │ Today · Tue                 │
-│ 2 commitments · 75 min free │
+│ Daily Mission               │
 │                             │
 │ ○ Draft résumé              │
 │   Open resume; write bullet │
@@ -377,12 +381,13 @@ Phone is for _capture, choosing the next action, focusing, and quick recovery_�
 │ ─ Available next ─          │
 │ ○ Email Maya                │
 │                             │
-│ Today  Plan  +  Projects  … │
+│ More  Today  +  Plan  Big   │
 └─────────────────────────────┘
 ```
 
-- Bottom tabs: Today, Plan, central Capture, Projects, More/Review. Keep to five or fewer.
-- Central Capture opens immediately with text input and later a press-to-talk option; it saves as Inbox on submit even if offline.
+- Bottom tabs: More, Today, central Capture, Plan, Big Picture. Keep to five or fewer.
+- More opens the complete navigation drawer from the left.
+- Central Capture opens immediately with text input, asks only for priority, and saves locally even if offline.
 - Today shows commitments first, then a collapsed available list. No side rail and no wide tables.
 - Focus is a full-screen, distraction-minimized view with oversized controls and optional haptic/audio end cue.
 - Plan uses a simple day strip/capacity cards; long-term map is read-first with a “continue on desktop” option for substantial restructuring.
@@ -541,6 +546,9 @@ Create a concise, version-controlled developer prompt that teaches the planner t
 - preserve 30–40 percent reserve by default and avoid filling every available day;
 - keep Today to 1–3 commitments and put additional candidates in Available next;
 - explain why each date or priority is suggested in one short sentence;
+- never choose or overwrite capture priority; priority always comes directly from the user;
+- keep the automatic capture assessment to one brief action check, without turning a clear one-step item into a full plan;
+- for a new Big Picture plan, reverse-plan from the desired outcome/date into medium-term milestones and the minimum useful short-term tasks, then present all additions as recommendations for review;
 - never silently roll work forward or create calendar events for ordinary tasks;
 - use supportive, direct language without guilt, diagnosis, fabricated urgency, or productivity scoring.
 

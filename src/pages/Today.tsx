@@ -19,7 +19,7 @@ export function Today() {
             day: "numeric",
           }).format(new Date())}
         </p>
-        <h1 className="mt-2 text-3xl font-bold">A small plan is enough.</h1>
+        <h1 className="mt-2 font-serif text-3xl font-bold">Daily Mission</h1>
         <p className="mt-2 text-slate-600">
           {tasks.length} of {profile?.maximumTodayCommitments ?? 3} commitments
         </p>

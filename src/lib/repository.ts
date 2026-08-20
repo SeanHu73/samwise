@@ -137,13 +137,18 @@ export async function createGoal(
   await queue("goal", value);
   return value;
 }
-export async function createMilestone(projectId: string, title: string) {
+export async function createMilestone(
+  projectId: string,
+  title: string,
+  fields: Partial<Milestone> = {},
+) {
   const value: Milestone = {
     ...base(),
     projectId,
     title: title.trim(),
     status: "pending",
     sortOrder: Date.now(),
+    ...fields,
   };
   await db.milestones.add(value);
   await queue("milestone", value);

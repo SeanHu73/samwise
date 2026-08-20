@@ -3,14 +3,13 @@ import { Layout } from "./components/Layout";
 import { Today } from "./pages/Today";
 import { InboxPage } from "./pages/InboxPage";
 import { Focus } from "./pages/Focus";
+import { BigPicture, BigPictureDetail } from "./pages/BigPicture";
 import {
   Assistant,
   Calendar,
   Insights,
   LongTerm,
   Plan,
-  ProjectDetail,
-  Projects,
   Reviews,
   Settings,
 } from "./pages/OtherPages";
@@ -21,8 +20,8 @@ export default function App() {
         <Route path="/today" element={<Today />} />
         <Route path="/inbox" element={<InboxPage />} />
         <Route path="/plan" element={<Plan />} />
-        <Route path="/projects" element={<Projects />} />
-        <Route path="/projects/:id" element={<ProjectDetail />} />
+        <Route path="/projects" element={<BigPicture />} />
+        <Route path="/projects/:id" element={<BigPictureDetail />} />
         <Route path="/map" element={<LongTerm />} />
         <Route path="/reviews" element={<Reviews />} />
         <Route path="/insights" element={<Insights />} />

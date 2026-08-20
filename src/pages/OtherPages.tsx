@@ -101,7 +101,6 @@ const Panel = ({
 
 export function Plan() {
   const tasks = useTasks(),
-    events = useCalendarEvents(),
     [message, setMessage] = useState("");
   const days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
@@ -120,20 +119,10 @@ export function Plan() {
           const key = date.toISOString().slice(0, 10),
             planned = tasks.filter(
               (t) => t.plannedForDate === key && t.status !== "done",
-            ),
-            busy = events
-              .filter((e) => e.startAt.slice(0, 10) === key)
-              .reduce(
-                (n, e) =>
-                  n +
-                  (new Date(e.endAt).getTime() -
-                    new Date(e.startAt).getTime()) /
-                    60000,
-                0,
-              );
+            );
           return (
             <section key={key} className="journey-card min-h-44">
-              <div className="flex justify-between">
+              <div>
                 <h2 className="font-serif text-lg font-bold">
                   {new Intl.DateTimeFormat(undefined, {
                     weekday: "long",
@@ -141,9 +130,6 @@ export function Plan() {
                     day: "numeric",
                   }).format(date)}
                 </h2>
-                <span className="quiet-label">
-                  {Math.round(busy / 60)}h busy
-                </span>
               </div>
               <div className="mt-3 space-y-2">
                 {planned.map((t) => (

@@ -3,6 +3,8 @@ import { db } from "./db";
 import {
   captureTask,
   createArea,
+  createMilestone,
+  createProject,
   deleteTask,
   getPlanningProfile,
   updateTask,
@@ -39,5 +41,28 @@ describe("task organization", () => {
     expect(operations.some((operation) => operation.kind === "delete")).toBe(
       true,
     );
+  });
+
+  it("stores a priority-first capture as an available task", async () => {
+    const task = await captureTask("Email the recruiter", {
+      priority: 2,
+      status: "next",
+      nextActionText: "Email the recruiter",
+    });
+
+    expect(task.priority).toBe(2);
+    expect(task.status).toBe("next");
+  });
+
+  it("stores target dates used by reverse planning", async () => {
+    const project = await createProject("Finish portfolio", {
+      targetDate: "2026-11-30",
+    });
+    const milestone = await createMilestone(project.id, "Draft case studies", {
+      targetDate: "2026-10-15",
+    });
+
+    expect(project.targetDate).toBe("2026-11-30");
+    expect(milestone.targetDate).toBe("2026-10-15");
   });
 });
