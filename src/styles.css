@@ -1,2 +1,76 @@
-@tailwind base;@tailwind components;@tailwind utilities;
-:root{font-family:Inter,ui-sans-serif,system-ui,sans-serif;color:#20352d;background:#f7f5ef;font-synthesis:none;text-rendering:optimizeLegibility}*{box-sizing:border-box}button,a,input,select{touch-action:manipulation}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #a4573f;outline-offset:2px}@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  color: #253229;
+  background: #f3ebd7;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+body {
+  background-color: #f3ebd7;
+  background-image:
+    radial-gradient(
+      circle at 15% 0%,
+      rgba(154, 116, 56, 0.08),
+      transparent 28%
+    ),
+    linear-gradient(rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.18));
+}
+* {
+  box-sizing: border-box;
+}
+button,
+a,
+input,
+select,
+textarea {
+  touch-action: manipulation;
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid #a75436;
+  outline-offset: 2px;
+}
+@layer components {
+  .journey-card {
+    @apply rounded-2xl border border-parchment-deep bg-white/75 p-5 shadow-soft backdrop-blur-sm;
+  }
+  .field {
+    @apply min-h-11 w-full rounded-xl border border-parchment-deep bg-white/85 px-3 py-2 font-normal text-ink placeholder:text-slate-400;
+  }
+  .primary {
+    @apply min-h-11 rounded-xl bg-moss px-5 font-semibold text-white shadow-sm hover:bg-forest;
+  }
+  .secondary {
+    @apply min-h-11 rounded-xl border border-moss/30 bg-white/70 px-4 py-2 font-semibold text-moss hover:bg-mist;
+  }
+  .quiet-label {
+    @apply text-xs font-semibold uppercase tracking-wider text-brass;
+  }
+  .trail-row {
+    @apply flex items-center justify-between gap-3 rounded-xl border border-parchment-deep/70 bg-parchment/60 px-3 py-2 text-sm;
+  }
+  .page-title {
+    @apply flex items-center gap-4;
+  }
+  .compass-mark {
+    @apply grid size-12 shrink-0 place-items-center rounded-full border border-brass/60 bg-white/60 text-brass;
+  }
+  .journey-line {
+    @apply border-l-2 border-dashed border-brass/40 pl-5;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition: none !important;
+    animation: none !important;
+  }
+}

@@ -27,7 +27,7 @@ Do not build a Notion clone. Exclude arbitrary databases, blocks, team collabora
 - Show duration ranges and confidence, never falsely exact estimates.
 - The Today list is intentionally small: 1–3 commitments plus optional next actions.
 - Make the next choice obvious. A user should never have to scan a giant database to decide what to start.
-- Separate a *commitment* from an *option*. Only commitments count toward today’s capacity; options remain available without creating failure.
+- Separate a _commitment_ from an _option_. Only commitments count toward today’s capacity; options remain available without creating failure.
 - Treat capacity, attention, and energy as variable. A plan is a hypothesis to revise, not a promise to punish.
 - Turn vague intentions into a definition of done, a first physical action, and an if–then start cue.
 - Use gentle recovery rather than streaks, red overdue badges, guilt language, or automatic rescheduling.
@@ -37,9 +37,9 @@ Do not build a Notion clone. Exclude arbitrary databases, blocks, team collabora
 
 The product should support a repeatable loop rather than merely store tasks:
 
-~~~text
+```text
 Capture → clarify → choose a small plan → start → notice time → close/replan → weekly reset
-~~~
+```
 
 Why these parts matter:
 
@@ -56,28 +56,28 @@ Research is directional rather than a prescription for a medical intervention. B
 
 ### Essential daily supports — build first
 
-| Function | User benefit | Required behavior |
-|---|---|---|
-| Frictionless Inbox | Capture before it disappears | One field, voice/text later, no mandatory category or date. |
-| Triage conversation | Removes “what is this?” paralysis | Classify as task, project, calendar event, waiting, reference, or someday/maybe. Ask at most one question at a time. |
-| Definition of done + next physical action | Makes tasks startable | A task can be marked “needs clarification”; active tasks need a verb-led next action such as “Open…” or “Email…”. |
-| Today commitments | Prevents overload | User selects 1–3 commitments; capacity warning is advisory. Keep a separate “available next” list. |
-| Focus mode | Helps initiation and time awareness | One selected task, large elapsed/countdown timer, next action, pause/finish/defer. Hide all other lists by default. |
-| Flexible rollover | Replaces guilt with a decision | At day close, choose finish, shrink, reschedule, waiting, delegate, drop, or move to someday. No automatic migration. |
-| Daily close + weekly reset | Restores trust in the plan | A 2-minute close and a 15–30 minute weekly review; both may be skipped without penalties. |
-| Duration calibration | Makes planning credible | Log actual focus time; show wide ranges, sample count, and an outlier-exclude control. |
+| Function                                  | User benefit                        | Required behavior                                                                                                     |
+| ----------------------------------------- | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Frictionless Inbox                        | Capture before it disappears        | One field, voice/text later, no mandatory category or date.                                                           |
+| Triage conversation                       | Removes “what is this?” paralysis   | Classify as task, project, calendar event, waiting, reference, or someday/maybe. Ask at most one question at a time.  |
+| Definition of done + next physical action | Makes tasks startable               | A task can be marked “needs clarification”; active tasks need a verb-led next action such as “Open…” or “Email…”.     |
+| Today commitments                         | Prevents overload                   | User selects 1–3 commitments; capacity warning is advisory. Keep a separate “available next” list.                    |
+| Focus mode                                | Helps initiation and time awareness | One selected task, large elapsed/countdown timer, next action, pause/finish/defer. Hide all other lists by default.   |
+| Flexible rollover                         | Replaces guilt with a decision      | At day close, choose finish, shrink, reschedule, waiting, delegate, drop, or move to someday. No automatic migration. |
+| Daily close + weekly reset                | Restores trust in the plan          | A 2-minute close and a 15–30 minute weekly review; both may be skipped without penalties.                             |
+| Duration calibration                      | Makes planning credible             | Log actual focus time; show wide ranges, sample count, and an outlier-exclude control.                                |
 
 ### Essential planning supports — build after the daily loop works
 
-| Function | User benefit | Required behavior |
-|---|---|---|
-| Project map | Holds multi-step work outside working memory | Purpose, definition of done, current stage, milestone, next action, notes/files. |
-| Exploration mode | Makes unclear goals actionable | For uncertain projects, propose research, examples, conversations, decision criteria, and a decision date before execution tasks. |
-| AI breakdown draft | Lowers planning friction without surrendering control | Generate 3–7 meaningful steps, dependencies, risks, estimates, and first action; user edits/accepts drafts. |
-| Weekly horizon | Connects today to the near future | Pick 1–3 weekly outcomes and distribute only feasible next actions across seven days. |
-| Direction/quarter view | Scaffolds long-term thinking | Show a few active directions, one outcome per direction, next milestone, next review. Everything else is parked. |
-| Calendar constraints | Makes plans realistic | Read events/travel/busy time; calculate remaining capacity. Planner tasks stay out of the calendar. |
-| “Later” parking lot | Stops false urgency | Someday/maybe and paused projects are reviewable, not overdue. |
+| Function               | User benefit                                          | Required behavior                                                                                                                 |
+| ---------------------- | ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Project map            | Holds multi-step work outside working memory          | Purpose, definition of done, current stage, milestone, next action, notes/files.                                                  |
+| Exploration mode       | Makes unclear goals actionable                        | For uncertain projects, propose research, examples, conversations, decision criteria, and a decision date before execution tasks. |
+| AI breakdown draft     | Lowers planning friction without surrendering control | Generate 3–7 meaningful steps, dependencies, risks, estimates, and first action; user edits/accepts drafts.                       |
+| Weekly horizon         | Connects today to the near future                     | Pick 1–3 weekly outcomes and distribute only feasible next actions across seven days.                                             |
+| Direction/quarter view | Scaffolds long-term thinking                          | Show a few active directions, one outcome per direction, next milestone, next review. Everything else is parked.                  |
+| Calendar constraints   | Makes plans realistic                                 | Read events/travel/busy time; calculate remaining capacity. Planner tasks stay out of the calendar.                               |
+| “Later” parking lot    | Stops false urgency                                   | Someday/maybe and paused projects are reviewable, not overdue.                                                                    |
 
 ### Helpful only once the core loop is trusted
 
@@ -124,25 +124,25 @@ Research is directional rather than a prescription for a medical intervention. B
 
 ## Technology
 
-| Layer | Choice | Why |
-|---|---|---|
-| Client | React + TypeScript + Vite | Small, fast, good PWA foundation. |
-| UI | Tailwind CSS + accessible primitives | Mobile-first without heavy design-system work. |
-| Local store | IndexedDB via Dexie | Durable offline replica and mutation outbox. |
-| PWA | Service worker and web manifest | Offline launch and home-screen installation. |
-| Backend | Supabase Auth, Postgres, Storage, Edge Functions | Auth, database, row-level security, storage, server functions. |
-| Sync | Custom operation log and sync endpoint | Predictable merging across offline devices. |
-| AI | Server-side OpenAI Responses API | API keys stay private; supports structured output and tools. |
-| Calendar | Google Calendar API OAuth | Read constraints and create approved real events. |
+| Layer       | Choice                                           | Why                                                            |
+| ----------- | ------------------------------------------------ | -------------------------------------------------------------- |
+| Client      | React + TypeScript + Vite                        | Small, fast, good PWA foundation.                              |
+| UI          | Tailwind CSS + accessible primitives             | Mobile-first without heavy design-system work.                 |
+| Local store | IndexedDB via Dexie                              | Durable offline replica and mutation outbox.                   |
+| PWA         | Service worker and web manifest                  | Offline launch and home-screen installation.                   |
+| Backend     | Supabase Auth, Postgres, Storage, Edge Functions | Auth, database, row-level security, storage, server functions. |
+| Sync        | Custom operation log and sync endpoint           | Predictable merging across offline devices.                    |
+| AI          | Server-side OpenAI Responses API                 | API keys stay private; supports structured output and tools.   |
+| Calendar    | Google Calendar API OAuth                        | Read constraints and create approved real events.              |
 
 Never put OpenAI keys, Google refresh tokens, or Supabase service keys in the client.
 
 ## Information hierarchy
 
-~~~text
+```text
 Direction → Goal/outcome → Project → Milestone → Task → Subtask
                                 ↘ Notes and attachments
-~~~
+```
 
 - Area: ongoing responsibility such as Career, Health, Home, or Finance.
 - Direction: broad quarterly/yearly theme, such as Build a stronger product-design career.
@@ -158,34 +158,34 @@ When the user lacks clarity, create an exploration project. Initial work should 
 
 All mutable user-owned tables include:
 
-~~~text
+```text
 id UUID; owner_id UUID; created_at; updated_at; deleted_at nullable; version integer
-~~~
+```
 
 Use soft deletion and immutable activity events.
 
-| Table | Main fields |
-|---|---|
-| areas | name, color, active |
-| directions | title, description, horizon start/end, status, review cadence |
-| goals | direction ID, title, definition of done, target date, status |
-| projects | goal ID, area ID, title, purpose, definition of done, type, status, target date, next review |
-| milestones | project ID, title, target date, status, sort order |
-| tasks | fields specified below |
-| task_events | immutable completion, timer, defer, estimate and status events |
-| task_estimate_profiles | learned duration aggregates by category/context |
-| notes | project ID, title, markdown content |
-| attachments | project/task ID, private storage path, filename, MIME type |
-| calendar_connections | encrypted OAuth token reference and selected calendars |
-| calendar_event_cache | normalized calendar constraints and last sync |
-| planning_sessions | review inputs plus proposed and approved plans |
-| planning_profiles | user-editable capacity, breakdown, tone, focus-session, energy, and scheduling preferences |
-| sync_operations | device-authored operations and server result |
-| agent_runs | prompt version, structured result, tools, approvals, error data |
+| Table                  | Main fields                                                                                  |
+| ---------------------- | -------------------------------------------------------------------------------------------- |
+| areas                  | name, color, active                                                                          |
+| directions             | title, description, horizon start/end, status, review cadence                                |
+| goals                  | direction ID, title, definition of done, target date, status                                 |
+| projects               | goal ID, area ID, title, purpose, definition of done, type, status, target date, next review |
+| milestones             | project ID, title, target date, status, sort order                                           |
+| tasks                  | fields specified below                                                                       |
+| task_events            | immutable completion, timer, defer, estimate and status events                               |
+| task_estimate_profiles | learned duration aggregates by category/context                                              |
+| notes                  | project ID, title, markdown content                                                          |
+| attachments            | project/task ID, private storage path, filename, MIME type                                   |
+| calendar_connections   | encrypted OAuth token reference and selected calendars                                       |
+| calendar_event_cache   | normalized calendar constraints and last sync                                                |
+| planning_sessions      | review inputs plus proposed and approved plans                                               |
+| planning_profiles      | user-editable capacity, breakdown, tone, focus-session, energy, and scheduling preferences   |
+| sync_operations        | device-authored operations and server result                                                 |
+| agent_runs             | prompt version, structured result, tools, approvals, error data                              |
 
 ### Task fields
 
-~~~text
+```text
 parent_task_id; project_id; milestone_id; area_id
 title; description_markdown
 status: inbox | next | planned | in_progress | done | deferred | dropped | delegated
@@ -195,14 +195,14 @@ actual_minutes derived from events
 due_date (true deadline only); earliest_start_date; planned_for_date (intention only)
 next_action_text; defer_count; last_defer_reason; rollover_state; sort_order
 completed_at; timestamps; version
-~~~
+```
 
 Record activity as events, not overwritten history:
 
-~~~text
+```text
 task_created, estimate_set, timer_started, timer_stopped, actual_time_logged,
 task_completed, task_deferred, task_reactivated, task_dropped, task_split, task_planned
-~~~
+```
 
 ## Product screens
 
@@ -267,7 +267,7 @@ task_completed, task_deferred, task_reactivated, task_dropped, task_split, task_
 
 Give Samwise an original, restrained high-fantasy aesthetic inspired by the feeling of a long, supported journey: old maps, green hills, woodland paths, warm inns, handwritten field notes, weathered leather, carved stone, brass, and firelight. It should feel like a trusted travelling companion and practical field journal—not a themed game, movie replica, or costume interface.
 
-This direction must remain legally and visually distinct. Do not copy film stills, franchise logos, title treatments, character likenesses, maps, heraldry, inscriptions, quotes, proprietary typefaces, or recognizable symbols from *The Lord of the Rings* adaptations. Use original illustrations and generic folklore/nature motifs such as paths, leaves, stars, mountains, lanterns, knots, and compass marks.
+This direction must remain legally and visually distinct. Do not copy film stills, franchise logos, title treatments, character likenesses, maps, heraldry, inscriptions, quotes, proprietary typefaces, or recognizable symbols from _The Lord of the Rings_ adaptations. Use original illustrations and generic folklore/nature motifs such as paths, leaves, stars, mountains, lanterns, knots, and compass marks.
 
 #### Emotional qualities
 
@@ -281,7 +281,7 @@ This direction must remain legally and visually distinct. Do not copy film still
 
 Use semantic tokens so themes remain consistent and accessible:
 
-~~~text
+```text
 parchment:      #F3EBD7  primary light surface
 parchment-deep: #E2D2AF  secondary surface and dividers
 ink:            #253229  primary text
@@ -292,7 +292,7 @@ ember:          #A75436  destructive/attention accent, used sparingly
 mist:           #DCE3DA  quiet status and disabled surfaces
 night:          #17231E  dark-theme background
 moon:           #EEE8D7  dark-theme text
-~~~
+```
 
 All final color pairs must meet WCAG AA contrast. Never use parchment texture beneath small text at enough opacity to reduce readability. Status must never rely on color alone.
 
@@ -341,9 +341,9 @@ All final color pairs must meet WCAG AA contrast. Never use parchment texture be
 
 ### Computer / tablet layout
 
-Desktop is for *thinking, processing, reviewing, and looking across horizons*.
+Desktop is for _thinking, processing, reviewing, and looking across horizons_.
 
-~~~text
+```text
 ┌───────────────┬───────────────────────────────────┬──────────────────────┐
 │ Samwise       │ Today / Project / Review           │ Context (optional)   │
 │ Inbox         │                                   │ Calendar capacity    │
@@ -353,7 +353,7 @@ Desktop is for *thinking, processing, reviewing, and looking across horizons*.
 │ Long-term     │                                   │                      │
 │ Reviews       │  Available next actions            │                      │
 └───────────────┴───────────────────────────────────┴──────────────────────┘
-~~~
+```
 
 - Left rail: stable navigation and Inbox count.
 - Main pane: one current surface, generous whitespace, list rows with title, next action, estimate range, and one-click complete/defer.
@@ -363,9 +363,9 @@ Desktop is for *thinking, processing, reviewing, and looking across horizons*.
 
 ### Phone layout
 
-Phone is for *capture, choosing the next action, focusing, and quick recovery*—not dense project administration.
+Phone is for _capture, choosing the next action, focusing, and quick recovery_—not dense project administration.
 
-~~~text
+```text
 ┌─────────────────────────────┐
 │ Today · Tue                 │
 │ 2 commitments · 75 min free │
@@ -379,7 +379,7 @@ Phone is for *capture, choosing the next action, focusing, and quick recovery*�
 │                             │
 │ Today  Plan  +  Projects  … │
 └─────────────────────────────┘
-~~~
+```
 
 - Bottom tabs: Today, Plan, central Capture, Projects, More/Review. Keep to five or fewer.
 - Central Capture opens immediately with text input and later a press-to-talk option; it saves as Inbox on submit even if offline.
@@ -412,22 +412,22 @@ Inputs:
 
 Initial behavior:
 
-~~~text
+```text
 prediction = user estimate if present, otherwise AI coarse estimate
 range = prediction times [0.7, 1.5]
 confidence = low
-~~~
+```
 
 For comparable completed tasks calculate median, 25th percentile, 75th percentile, sample count, and actual-to-original-estimate ratio.
 
-~~~text
+```text
 if comparable samples < 5:
   broad range and low confidence
 otherwise:
   blend user estimate with historical median
   range = percentile 25 to percentile 75, widened for task uncertainty
   confidence depends on sample count and spread
-~~~
+```
 
 Example explanation:
 
@@ -449,22 +449,22 @@ Start read-only. Ask for write scope only when the user invokes real-event creat
 
 Cache a bounded range, for example 30 days past and 90 days future:
 
-~~~text
+```text
 external_event_id; calendar_id; starts_at; ends_at; all_day; busy_status;
 title_or_privacy_label; updated_at; source_hash
-~~~
+```
 
 Offer privacy mode that stores only busy time and generic labels.
 
 ### Capacity calculation
 
-~~~text
+```text
 usable capacity =
   configured work window
   - busy calendar time
   - travel/buffer allowance
   - reserve percentage (default 30–40 percent)
-~~~
+```
 
 All-day travel reduces capacity substantially. User can override. Always show a recommendation, not a command.
 
@@ -480,7 +480,7 @@ All-day travel reduces capacity substantially. User can override. Always show a 
 
 ### Operation example
 
-~~~json
+```json
 {
   "operation_id": "uuid",
   "device_id": "uuid",
@@ -488,10 +488,10 @@ All-day travel reduces capacity substantially. User can override. Always show a 
   "entity_id": "uuid",
   "base_version": 7,
   "kind": "update_fields",
-  "fields": {"status": "done", "completed_at": "timestamp"},
+  "fields": { "status": "done", "completed_at": "timestamp" },
   "client_created_at": "timestamp"
 }
-~~~
+```
 
 ### Conflict rules
 
@@ -550,7 +550,7 @@ Keep this policy lean and state each rule once. Store a `prompt_version` with ev
 
 Add a `planning_profiles` owner-scoped table and a Settings → Planning style screen. Start with a short guided setup; every setting remains editable and includes “Use system default.” Suggested fields:
 
-~~~text
+```text
 work_days; preferred_work_windows; daily_focus_minutes
 reserve_percent; maximum_today_commitments
 minimum_task_minutes; preferred_focus_session_minutes
@@ -563,7 +563,7 @@ reminder_preference; quiet_hours
 deadline_buffer_days; weekly_review_day
 accessibility_or_attention_preferences optional
 updated_at; version
-~~~
+```
 
 Do not ask the user to configure everything before the first plan. Begin with safe defaults, ask at most one preference question at a time, and offer profile changes when a repeated edit reveals a useful pattern. Example: “You shortened four suggested focus sessions to 20 minutes. Make 20 minutes your default?” Apply the change only after confirmation. Allow the user to inspect, edit, reset, export, or delete the profile.
 
@@ -601,7 +601,7 @@ Scheduling is a separate reviewed draft, not a side effect of task breakdown. Ad
 
 Suggested structured schedule result:
 
-~~~json
+```json
 {
   "summary": "string",
   "assumptions": ["string"],
@@ -617,7 +617,7 @@ Suggested structured schedule result:
     }
   ]
 }
-~~~
+```
 
 The UI must show calendar constraints and task intentions as separate layers. Accepting a schedule updates Samwise only. A genuine event uses the separate calendar-event approval flow.
 
@@ -625,11 +625,11 @@ The UI must show calendar constraints and task intentions as separate layers. Ac
 
 After the user edits or rejects a breakdown or schedule, capture structured feedback rather than treating the model's output as truth:
 
-~~~text
+```text
 too_large; too_small; wrong_order; wrong_date; wrong_energy;
 missing_step; unnecessary_step; estimate_low; estimate_high;
 not_my_priority; unclear_wording; other
-~~~
+```
 
 Store the proposal, accepted edits, rejection tags, prompt version, model configuration, and eventual outcome. Use aggregate patterns to suggest explicit profile changes and improve future prompts. Do not infer medical traits, hidden priorities, or permanent preferences from a few actions. Do not automatically rewrite the static prompt from live user data.
 
@@ -650,7 +650,7 @@ Do not release personalized planning until:
 
 Expose the minimum needed for each run:
 
-~~~text
+```text
 read_project_context(project_id)
 list_tasks(filters)
 read_planning_profile()
@@ -661,13 +661,13 @@ update_task_draft(task_id, patch)  // drafts only
 propose_task_schedule(task_ids, start_date, end_date) // drafts only
 search_project_attachments(project_id, query)
 propose_calendar_event(details)    // approval request only
-~~~
+```
 
 After approval, a separate server action may create the Google Calendar event from an immutable approved payload; it must not use a fresh free-form model response.
 
 ### Structured result
 
-~~~json
+```json
 {
   "summary": "string",
   "clarifying_question": "string or null",
@@ -687,7 +687,7 @@ After approval, a separate server action may create the Google Calendar event fr
   "risks_or_unknowns": ["string"],
   "plan_notes": ["string"]
 }
-~~~
+```
 
 Use structured outputs and server-side function calling, not parsed free-form checklists. [OpenAI structured outputs](https://developers.openai.com/api/docs/guides/structured-outputs) and [function calling](https://developers.openai.com/api/docs/guides/function-calling) support this design.
 
@@ -731,23 +731,23 @@ Never commit API keys, database passwords, refresh tokens, access tokens, or ser
 2. In Project Settings → API, copy the Project URL and browser-safe publishable/anon key.
 3. Authenticate and link the local CLI:
 
-~~~powershell
+```powershell
 npx supabase login
 npx supabase link --project-ref YOUR_PROJECT_REF
-~~~
+```
 
 4. Preview and apply the committed migration:
 
-~~~powershell
+```powershell
 npx supabase db push --dry-run
 npx supabase db push
-~~~
+```
 
 5. Deploy the authenticated sync function:
 
-~~~powershell
+```powershell
 npx supabase functions deploy sync
-~~~
+```
 
 6. Verify the tables, row-level-security policies, private `attachments` bucket, and `sync` function in the Supabase dashboard.
 7. Keep JWT verification enabled for `sync`; the client sends the signed-in user's access token and all database writes remain scoped by RLS.
@@ -766,10 +766,10 @@ npx supabase functions deploy sync
 2. Use the Vite framework preset, repository root as Root Directory, `npm run build` as Build Command, and `dist` as Output Directory. Vercel normally detects these automatically.
 3. Add the following to Development, Preview, and Production as appropriate:
 
-~~~text
+```text
 VITE_SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=YOUR_BROWSER_SAFE_PUBLISHABLE_KEY
-~~~
+```
 
 4. Deploy. Environment-variable changes affect only new deployments, so redeploy after changing them.
 5. Preserve `vercel.json`; its SPA fallback lets direct visits to `/today`, `/projects`, and `/focus/:id` load the React application.
@@ -894,6 +894,17 @@ A user can capture a task in under ten seconds, use the PWA offline, receive aut
 - Implementation intentions (“if situation X, then I will do Y”) have meta-analytic support for improving goal attainment in clinical and analogue populations. [Toli, Webb & Hardy](https://pubmed.ncbi.nlm.nih.gov/25965276/)
 - Mental contrasting plus implementation intentions has a small-to-moderate average effect on goal attainment; it informs the obstacle/response prompt for long-term planning. [Wang, Wang & Gai](https://pubmed.ncbi.nlm.nih.gov/34054628/)
 - The evidence does not establish a single best productivity app, a universally optimal notification schedule, or that gamification/body doubling should be default features. Samwise should test these features with the user and keep them optional.
+
+## Autonomous full-build execution contract
+
+For a one-request implementation, work on `codex/full-v1`, preserve existing data through additive migrations, and execute Milestones 0–5 through their acceptance gates. Codex may make reversible implementation decisions, install dependencies, run tests, deploy Supabase migrations/functions, push the working branch, and create a Vercel preview. It pauses only for secrets or consent that must come from the account owner, destructive data operations, or final production promotion. Compilation alone is not acceptance: run unit, security, production-build, offline/sync, and representative planner-fixture checks. Never place server secrets in `VITE_` variables, source control, IndexedDB, logs, or chat.
+
+Required owner handoffs are limited to:
+
+1. Add `OPENAI_API_KEY` as a Supabase Edge Function secret.
+2. Create Google OAuth web credentials, register the documented callback URL, and add the Google server secrets.
+3. Complete Google consent and cross-device phone verification.
+4. Approve the tested preview before promotion to `main`.
 
 ## First Codex prompt
 

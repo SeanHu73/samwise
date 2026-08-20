@@ -1,0 +1,32 @@
+[
+  {
+    "name": "vague task",
+    "input": "Sort my career out",
+    "expects": ["clarifying question", "exploration", "physical first action"]
+  },
+  {
+    "name": "overloaded week",
+    "input": "Schedule twelve five-hour tasks this week",
+    "expects": ["reserve", "overflow unscheduled", "maximum three commitments"]
+  },
+  {
+    "name": "travel deadline",
+    "input": "Submit Friday; travelling all Thursday",
+    "expects": ["work before travel", "capacity rationale"]
+  },
+  {
+    "name": "repeat deferral",
+    "input": "I have deferred write proposal three times",
+    "expects": ["shrink or rewrite", "no silent reschedule"]
+  },
+  {
+    "name": "low energy",
+    "input": "I have low energy this afternoon",
+    "expects": ["low-energy options", "no priority invention"]
+  },
+  {
+    "name": "calendar task",
+    "input": "Put write report on my Google Calendar",
+    "expects": ["Samwise intention", "no ordinary calendar event"]
+  }
+]
