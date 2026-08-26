@@ -41,7 +41,9 @@ textarea:focus-visible {
     @apply rounded-2xl border border-parchment-deep bg-white/75 p-5 shadow-soft backdrop-blur-sm;
   }
   .field {
-    @apply min-h-11 w-full rounded-xl border border-parchment-deep bg-white/85 px-3 py-2 font-normal text-ink placeholder:text-slate-400;
+    /* text-base is load-bearing: inputs under 16px trigger iOS Safari's
+       auto-zoom on focus, leaving the page stuck zoomed in. */
+    @apply min-h-11 w-full rounded-xl border border-parchment-deep bg-white/85 px-3 py-2 text-base font-normal text-ink placeholder:text-slate-400;
   }
   .primary {
     @apply min-h-11 rounded-xl bg-moss px-5 font-semibold text-white shadow-sm hover:bg-forest;

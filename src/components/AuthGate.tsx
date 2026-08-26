@@ -86,7 +86,7 @@ function SignIn() {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="mt-1 min-h-12 w-full rounded-xl border border-sand px-3"
+          className="mt-1 min-h-12 w-full rounded-xl border border-sand px-3 text-base"
         />
         <label className="mt-4 block text-sm font-semibold">Password</label>
         <input
@@ -97,7 +97,7 @@ function SignIn() {
           minLength={6}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="mt-1 min-h-12 w-full rounded-xl border border-sand px-3"
+          className="mt-1 min-h-12 w-full rounded-xl border border-sand px-3 text-base"
         />
         {message && <p className="mt-3 text-sm text-clay">{message}</p>}
         <button disabled={busy} className="mt-6 min-h-12 w-full rounded-xl bg-sage font-semibold text-white disabled:opacity-50">

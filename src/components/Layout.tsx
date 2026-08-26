@@ -13,7 +13,7 @@ import {
   Sun,
   X,
 } from "lucide-react";
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { Capture } from "./Capture";
 import { useOutboxCount, useOverflow, useQuickAdd } from "../hooks/useData";
 import { syncNow } from "../lib/sync";
@@ -31,7 +31,17 @@ const nav = [
 export function Layout() {
   const unorganised = useOverflow().length + useQuickAdd().length,
     pending = useOutboxCount(),
-    [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    [mobileMenuOpen, setMobileMenuOpen] = useState(false),
+    navigate = useNavigate();
+  const startCapture = () => {
+    navigate("/today");
+    // Wait a beat for the Today page to mount before scrolling to the box.
+    window.setTimeout(() => {
+      const box = document.getElementById("capture-today");
+      box?.scrollIntoView({ behavior: "smooth", block: "center" });
+      box?.focus({ preventScroll: true });
+    }, 120);
+  };
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
     const run = () => {
@@ -169,15 +179,16 @@ export function Layout() {
           More
         </button>
         <MobileLink to="/today" label="Today" Icon={Sun} />
-        <NavLink
-          to="/today"
+        <button
+          type="button"
+          onClick={startCapture}
           aria-label="Capture"
           className="grid place-items-center"
         >
           <span className="grid size-14 -translate-y-3 place-items-center rounded-full bg-moss text-white shadow-soft">
             <Plus />
           </span>
-        </NavLink>
+        </button>
         <MobileLink to="/plan" label="Plan" Icon={CalendarDays} />
         <MobileLink to="/projects" label="Big Picture" Icon={FolderKanban} />
       </nav>

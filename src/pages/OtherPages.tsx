@@ -128,7 +128,7 @@ export function Plan() {
               (t) => t.plannedForDate === key && activeStatus(t),
             );
           return (
-            <section key={key} className="journey-card min-h-44">
+            <section key={key} className="journey-card p-4 sm:p-5 lg:min-h-44">
               <div>
                 <h2 className="font-serif text-lg font-bold">
                   {key === todayKey() ? "Today · " : ""}
@@ -160,22 +160,25 @@ export function Plan() {
                   <p className="text-sm text-slate-500">Room for reality.</p>
                 )}
               </div>
-              <select
-                aria-label={`Add task to ${key}`}
-                className="field mt-3"
-                value=""
-                onChange={(e) => {
-                  const task = tasks.find((t) => t.id === e.target.value);
-                  if (task) void planTask(task, key);
-                }}
-              >
-                <option value="">Add an available task…</option>
-                {unplanned.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.title}
-                  </option>
-                ))}
-              </select>
+              <DayAdd date={key} />
+              {!!unplanned.length && (
+                <select
+                  aria-label={`Move an existing task to ${key}`}
+                  className="field mt-2"
+                  value=""
+                  onChange={(e) => {
+                    const task = tasks.find((t) => t.id === e.target.value);
+                    if (task) void planTask(task, key);
+                  }}
+                >
+                  <option value="">Or pick an existing task…</option>
+                  {unplanned.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.title}
+                    </option>
+                  ))}
+                </select>
+              )}
             </section>
           );
         })}
@@ -210,6 +213,30 @@ export function Plan() {
         <TaskDetail taskId={openId} onClose={() => setOpenId(undefined)} />
       )}
     </>
+  );
+}
+function DayAdd({ date }: { date: string }) {
+  const [title, setTitle] = useState("");
+  return (
+    <form
+      className="mt-3 flex gap-2"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        if (!title.trim()) return;
+        const task = await captureTask(title);
+        await planTask(task, date);
+        setTitle("");
+      }}
+    >
+      <input
+        className="field flex-1"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        placeholder="Add a new task…"
+        aria-label={`New task for ${date}`}
+      />
+      <button className="secondary shrink-0">Add</button>
+    </form>
   );
 }
 function OrganiseRow({

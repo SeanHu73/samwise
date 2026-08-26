@@ -1,6 +1,14 @@
-import { useState, type FormEvent } from "react";
+import { useId, useState, type FormEvent } from "react";
 import { captureTask } from "../lib/repository";
-export function Capture({ compact = false }: { compact?: boolean }) {
+export function Capture({
+  compact = false,
+  inputId,
+}: {
+  compact?: boolean;
+  inputId?: string;
+}) {
+  const autoId = useId();
+  const fieldId = inputId ?? autoId;
   const [title, setTitle] = useState("");
   const [choosingPriority, setChoosingPriority] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -23,13 +31,13 @@ export function Capture({ compact = false }: { compact?: boolean }) {
         compact ? "flex gap-2" : "rounded-3xl bg-white p-4 shadow-soft"
       }
     >
-      <label className="sr-only" htmlFor="capture">
+      <label className="sr-only" htmlFor={fieldId}>
         Capture an item
       </label>
       {!choosingPriority ? (
         <>
           <input
-            id="capture"
+            id={fieldId}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="What just came to mind?"

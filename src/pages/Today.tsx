@@ -28,7 +28,7 @@ export function Today() {
         </p>
       </header>
       <div className="mt-5 md:hidden">
-        <Capture />
+        <Capture inputId="capture-today" />
       </div>
       <List title="Tasks" empty="Nothing planned yet. Add tasks here or on the Plan tab.">
         {tasks.map((t) => (
