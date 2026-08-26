@@ -7,6 +7,7 @@ import {
   createProject,
   deleteTask,
   getPlanningProfile,
+  swapTaskOrder,
   updateTask,
 } from "./repository";
 describe("planning profile initialization", () => {
@@ -52,6 +53,16 @@ describe("task organization", () => {
 
     expect(task.priority).toBe(2);
     expect(task.status).toBe("next");
+  });
+
+  it("swaps manual ordering between two tasks", async () => {
+    const first = await captureTask("First", { sortOrder: 100 });
+    const second = await captureTask("Second", { sortOrder: 200 });
+
+    await swapTaskOrder(first, second);
+
+    expect((await db.tasks.get(first.id))?.sortOrder).toBe(200);
+    expect((await db.tasks.get(second.id))?.sortOrder).toBe(100);
   });
 
   it("stores target dates used by reverse planning", async () => {

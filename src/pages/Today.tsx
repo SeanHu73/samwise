@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import type { Task } from "../types";
 import { useOverflow, useQuickAdd, useToday } from "../hooks/useData";
+import { swapTaskOrder } from "../lib/repository";
 import { TaskRow } from "../components/TaskRow";
 import { TaskDetail } from "../components/TaskDetail";
 import { Capture } from "../components/Capture";
@@ -31,8 +32,20 @@ export function Today() {
         <Capture inputId="capture-today" />
       </div>
       <List title="Tasks" empty="Nothing planned yet. Add tasks here or on the Plan tab.">
-        {tasks.map((t) => (
-          <TaskRow key={t.id} task={t} onOpen={open} />
+        {tasks.map((t, i) => (
+          <TaskRow
+            key={t.id}
+            task={t}
+            onOpen={open}
+            onMoveUp={
+              i > 0 ? () => void swapTaskOrder(t, tasks[i - 1]) : undefined
+            }
+            onMoveDown={
+              i < tasks.length - 1
+                ? () => void swapTaskOrder(t, tasks[i + 1])
+                : undefined
+            }
+          />
         ))}
       </List>
       {!!overflow.length && (

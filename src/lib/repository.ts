@@ -269,6 +269,12 @@ export async function completeTask(task: Task, minutes?: number) {
   await event(task.id, "task_completed");
   return value;
 }
+/** Swap two tasks' manual positions (the lists sort by sortOrder). */
+export async function swapTaskOrder(a: Task, b: Task) {
+  const orderA = a.sortOrder === b.sortOrder ? b.sortOrder + 1 : a.sortOrder;
+  await updateTask(a, { sortOrder: b.sortOrder });
+  await updateTask(b, { sortOrder: orderA });
+}
 export async function dropTask(task: Task) {
   const value = await updateTask(task, {
     status: "dropped",

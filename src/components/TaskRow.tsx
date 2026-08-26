@@ -1,4 +1,4 @@
-import { Check, Clock3, Play } from "lucide-react";
+import { Check, ChevronDown, ChevronUp, Clock3, Play } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { Task } from "../types";
 import { completeTask, planToday } from "../lib/repository";
@@ -16,9 +16,13 @@ const palette = [
 export function TaskRow({
   task,
   onOpen,
+  onMoveUp,
+  onMoveDown,
 }: {
   task: Task;
   onOpen: (task: Task) => void;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
 }) {
   const areas = useAreas(),
     area = areas.find((item) => item.id === task.areaId),
@@ -106,6 +110,28 @@ export function TaskRow({
             </button>
           </div>
         </div>
+        {(onMoveUp || onMoveDown) && (
+          <div className="flex shrink-0 flex-col gap-1">
+            <button
+              type="button"
+              aria-label={`Move ${task.title} up`}
+              disabled={!onMoveUp}
+              onClick={onMoveUp}
+              className="grid size-9 place-items-center rounded-lg border border-sand text-slate-500 hover:bg-sand/50 disabled:opacity-30"
+            >
+              <ChevronUp size={16} />
+            </button>
+            <button
+              type="button"
+              aria-label={`Move ${task.title} down`}
+              disabled={!onMoveDown}
+              onClick={onMoveDown}
+              className="grid size-9 place-items-center rounded-lg border border-sand text-slate-500 hover:bg-sand/50 disabled:opacity-30"
+            >
+              <ChevronDown size={16} />
+            </button>
+          </div>
+        )}
       </div>
     </article>
   );

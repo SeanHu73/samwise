@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   CalendarDays,
+  ChevronDown,
+  ChevronUp,
   Compass,
   FileText,
   Map,
@@ -20,6 +22,7 @@ import {
   planTask,
   recordReview,
   saveEntity,
+  swapTaskOrder,
   updateDirection,
   updateArea,
 } from "../lib/repository";
@@ -126,9 +129,9 @@ export function Plan() {
       <div className="mt-5 grid grid-cols-1 gap-2 sm:mt-7 sm:gap-4 lg:grid-cols-2">
         {days.map((date) => {
           const key = dateKey(date),
-            planned = tasks.filter(
-              (t) => t.plannedForDate === key && activeStatus(t),
-            ),
+            planned = tasks
+              .filter((t) => t.plannedForDate === key && activeStatus(t))
+              .sort((a, b) => a.sortOrder - b.sortOrder),
             adding = addingFor === key;
           return (
             <section key={key} className="journey-card p-3 sm:p-5 lg:min-h-44">
@@ -153,21 +156,46 @@ export function Plan() {
               </div>
               {!!planned.length && (
                 <div className="mt-2 space-y-1.5 sm:mt-3 sm:space-y-2">
-                  {planned.map((t) => (
-                    <button
-                      key={t.id}
-                      type="button"
-                      onClick={() => open(t)}
-                      className="trail-row w-full text-left hover:border-moss/50"
-                    >
-                      <span className="flex min-w-0 items-center gap-2">
+                  {planned.map((t, i) => (
+                    <div key={t.id} className="trail-row hover:border-moss/50">
+                      <button
+                        type="button"
+                        onClick={() => open(t)}
+                        className="flex min-w-0 flex-1 items-center gap-2 text-left"
+                      >
                         <span className="truncate">{t.title}</span>
                         <PriorityBadge priority={t.priority} short />
-                      </span>
-                      <span>
+                      </button>
+                      <span className="shrink-0 text-xs text-slate-500">
                         {t.estimatedMinutes ? `${t.estimatedMinutes}m` : ""}
                       </span>
-                    </button>
+                      {planned.length > 1 && (
+                        <span className="flex shrink-0 gap-1">
+                          <button
+                            type="button"
+                            aria-label={`Move ${t.title} up`}
+                            disabled={i === 0}
+                            onClick={() =>
+                              void swapTaskOrder(t, planned[i - 1])
+                            }
+                            className="grid size-8 place-items-center rounded-lg text-slate-500 hover:bg-sand/60 disabled:opacity-30"
+                          >
+                            <ChevronUp size={15} />
+                          </button>
+                          <button
+                            type="button"
+                            aria-label={`Move ${t.title} down`}
+                            disabled={i === planned.length - 1}
+                            onClick={() =>
+                              void swapTaskOrder(t, planned[i + 1])
+                            }
+                            className="grid size-8 place-items-center rounded-lg text-slate-500 hover:bg-sand/60 disabled:opacity-30"
+                          >
+                            <ChevronDown size={15} />
+                          </button>
+                        </span>
+                      )}
+                    </div>
                   ))}
                 </div>
               )}
