@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
-import { useLiveQuery } from "dexie-react-hooks";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   CalendarDays,
   Compass,
@@ -9,49 +8,40 @@ import {
   Mountain,
   ScrollText,
   Sparkles,
-  Upload,
 } from "lucide-react";
 import { db } from "../lib/db";
 import {
   createAgentRun,
   createArea,
-  createAttachment,
   captureTask,
   createDirection,
   createGoal,
-  createMilestone,
-  createNote,
-  createProject,
   planTask,
   recordReview,
   saveEntity,
   updateDirection,
   updateArea,
-  updateMilestone,
-  updateNote,
-  updateProject,
 } from "../lib/repository";
 import { supabase } from "../lib/supabase";
 import { fromServerEntity } from "../lib/sync";
 import { durationProfile } from "../lib/duration";
-import { id, todayKey } from "../lib/ids";
+import { dateKey, todayKey } from "../lib/ids";
 import {
   useActiveAreas,
   useCalendarEvents,
   useDirections,
   useGoals,
+  useOverflow,
   usePlanningProfile,
   useProjects,
+  useQuickAdd,
   useTaskEvents,
   useTasks,
 } from "../hooks/useData";
-import type {
-  Attachment,
-  Direction,
-  Goal,
-  Note,
-  PlanningProfile,
-} from "../types";
+import { AutoSaveText } from "../components/AutoSaveText";
+import { PriorityBadge } from "../components/PriorityBadge";
+import { TaskDetail } from "../components/TaskDetail";
+import type { Direction, Goal, PlanningProfile, Task } from "../types";
 
 interface PlannerDraft {
   title: string;
@@ -99,14 +89,24 @@ const Panel = ({
   </section>
 );
 
+const activeStatus = (task: Task) =>
+  task.status !== "done" && task.status !== "dropped" && !task.deletedAt;
+
 export function Plan() {
   const tasks = useTasks(),
-    [message, setMessage] = useState("");
+    overflow = useOverflow(),
+    quickAdd = useQuickAdd(),
+    [openId, setOpenId] = useState<string>();
   const days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() + i);
     return d;
   });
+  const unplanned = tasks.filter(
+    (t) => activeStatus(t) && !t.plannedForDate,
+  );
+  const weekend = [0, 6].includes(new Date().getDay());
+  const open = (task: Task) => setOpenId(task.id);
   return (
     <>
       <PageTitle
@@ -114,16 +114,24 @@ export function Plan() {
         title="Seven-day path"
         subtitle="Intentions with breathing room—not a packed calendar."
       />
+      {!!overflow.length && (
+        <p className="journey-card mt-5 border-ember/40 text-sm text-slate-700">
+          {weekend
+            ? "It’s the end of the week — the tasks under “From earlier days” below need a new home."
+            : `${overflow.length} task${overflow.length === 1 ? "" : "s"} from earlier days ${overflow.length === 1 ? "is" : "are"} waiting below for a new day.`}
+        </p>
+      )}
       <div className="mt-7 grid gap-4 lg:grid-cols-2">
         {days.map((date) => {
-          const key = date.toISOString().slice(0, 10),
+          const key = dateKey(date),
             planned = tasks.filter(
-              (t) => t.plannedForDate === key && t.status !== "done",
+              (t) => t.plannedForDate === key && activeStatus(t),
             );
           return (
             <section key={key} className="journey-card min-h-44">
               <div>
                 <h2 className="font-serif text-lg font-bold">
+                  {key === todayKey() ? "Today · " : ""}
                   {new Intl.DateTimeFormat(undefined, {
                     weekday: "long",
                     month: "short",
@@ -133,12 +141,20 @@ export function Plan() {
               </div>
               <div className="mt-3 space-y-2">
                 {planned.map((t) => (
-                  <div key={t.id} className="trail-row">
-                    <span>{t.title}</span>
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => open(t)}
+                    className="trail-row w-full text-left hover:border-moss/50"
+                  >
+                    <span className="flex min-w-0 items-center gap-2">
+                      <span className="truncate">{t.title}</span>
+                      <PriorityBadge priority={t.priority} short />
+                    </span>
                     <span>
                       {t.estimatedMinutes ? `${t.estimatedMinutes}m` : ""}
                     </span>
-                  </div>
+                  </button>
                 ))}
                 {!planned.length && (
                   <p className="text-sm text-slate-500">Room for reality.</p>
@@ -147,336 +163,87 @@ export function Plan() {
               <select
                 aria-label={`Add task to ${key}`}
                 className="field mt-3"
-                defaultValue=""
-                onChange={async (e) => {
+                value=""
+                onChange={(e) => {
                   const task = tasks.find((t) => t.id === e.target.value);
-                  if (task)
-                    try {
-                      await planTask(task, key, false);
-                      setMessage("Path updated.");
-                    } catch (error) {
-                      setMessage((error as Error).message);
-                    }
-                  e.target.value = "";
+                  if (task) void planTask(task, key);
                 }}
               >
                 <option value="">Add an available task…</option>
-                {tasks
-                  .filter(
-                    (t) =>
-                      !t.plannedForDate &&
-                      ["next", "inbox", "deferred"].includes(t.status),
-                  )
-                  .map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.title}
-                    </option>
-                  ))}
+                {unplanned.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.title}
+                  </option>
+                ))}
               </select>
             </section>
           );
         })}
       </div>
-      {message && <p className="mt-4 text-sm text-moss">{message}</p>}
+      {!!overflow.length && (
+        <section className="mt-9">
+          <h2 className="text-lg font-bold">From earlier days</h2>
+          <p className="mt-1 text-sm text-slate-600">
+            Pick a new day for each, or open one to drop it.
+          </p>
+          <div className="mt-3 space-y-2">
+            {overflow.map((task) => (
+              <OrganiseRow key={task.id} task={task} onOpen={open} showDate />
+            ))}
+          </div>
+        </section>
+      )}
+      {!!quickAdd.length && (
+        <section className="mt-9">
+          <h2 className="text-lg font-bold">Quick Add</h2>
+          <p className="mt-1 text-sm text-slate-600">
+            Captured thoughts without a day yet. Place each one on the week.
+          </p>
+          <div className="mt-3 space-y-2">
+            {quickAdd.map((task) => (
+              <OrganiseRow key={task.id} task={task} onOpen={open} />
+            ))}
+          </div>
+        </section>
+      )}
+      {openId && (
+        <TaskDetail taskId={openId} onClose={() => setOpenId(undefined)} />
+      )}
     </>
   );
 }
-
-export function Projects() {
-  const projects = useProjects(),
-    [title, setTitle] = useState("");
+function OrganiseRow({
+  task,
+  onOpen,
+  showDate = false,
+}: {
+  task: Task;
+  onOpen: (task: Task) => void;
+  showDate?: boolean;
+}) {
   return (
-    <>
-      <PageTitle
-        icon={<Compass />}
-        title="Projects"
-        subtitle="Purpose → milestone → next action."
-      />
-      <form
-        className="mt-6 flex gap-2"
-        onSubmit={async (e) => {
-          e.preventDefault();
-          if (title.trim()) {
-            await createProject(title);
-            setTitle("");
-          }
-        }}
+    <div className="trail-row">
+      <button
+        type="button"
+        onClick={() => onOpen(task)}
+        className="flex min-w-0 flex-1 flex-wrap items-center gap-2 text-left"
       >
-        <input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="A concrete project outcome"
-          className="field flex-1"
-        />
-        <button className="primary">Add project</button>
-      </form>
-      <div className="mt-8 grid gap-4 sm:grid-cols-2">
-        {projects.map((p) => (
-          <Link
-            key={p.id}
-            to={`/projects/${p.id}`}
-            className="journey-card group"
-          >
-            <span className="quiet-label">
-              {p.type === "explore" ? "Exploration" : "Journey"}
-            </span>
-            <h2 className="mt-2 font-serif text-xl font-bold group-hover:text-moss">
-              {p.title}
-            </h2>
-            <p className="mt-2 text-sm text-slate-600">
-              {p.purpose || "Add why this journey matters."}
-            </p>
-          </Link>
-        ))}
-      </div>
-    </>
-  );
-}
-
-export function ProjectDetail() {
-  const { id: projectId } = useParams(),
-    project = useLiveQuery(
-      () => (projectId ? db.projects.get(projectId) : undefined),
-      [projectId],
-    ),
-    milestones = useLiveQuery(
-      () =>
-        projectId
-          ? db.milestones.where("projectId").equals(projectId).toArray()
-          : [],
-      [projectId],
-      [],
-    ),
-    notes = useLiveQuery(
-      () =>
-        projectId
-          ? db.notes.where("projectId").equals(projectId).toArray()
-          : [],
-      [projectId],
-      [],
-    ),
-    attachments = useLiveQuery(
-      () =>
-        projectId
-          ? db.attachments
-              .where("projectId")
-              .equals(projectId)
-              .filter((x) => !x.deletedAt)
-              .toArray()
-          : [],
-      [projectId],
-      [],
-    ),
-    tasks = useLiveQuery(
-      () =>
-        projectId
-          ? db.tasks
-              .where("projectId")
-              .equals(projectId)
-              .filter((x) => !x.deletedAt)
-              .toArray()
-          : [],
-      [projectId],
-      [],
-    ),
-    [milestone, setMilestone] = useState("");
-  if (!project) return <p>Project not found.</p>;
-  return (
-    <>
-      <PageTitle
-        icon={<Mountain />}
-        title={project.title}
-        subtitle={
-          project.type === "explore"
-            ? "Explore uncertainty before committing to execution."
-            : "Keep only the next meaningful stretch visible."
-        }
-      />
-      <div className="mt-7 grid gap-5 lg:grid-cols-2">
-        <Panel title="Purpose and finish line">
-          <textarea
-            className="field min-h-24"
-            value={project.purpose}
-            placeholder="Why does this matter?"
-            onChange={(e) =>
-              void updateProject(project, { purpose: e.target.value })
-            }
-          />
-          <textarea
-            className="field mt-3 min-h-24"
-            value={project.definitionOfDone}
-            placeholder="What observable result means done?"
-            onChange={(e) =>
-              void updateProject(project, { definitionOfDone: e.target.value })
-            }
-          />
-          <label className="mt-3 flex gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={project.type === "explore"}
-              onChange={(e) =>
-                void updateProject(project, {
-                  type: e.target.checked ? "explore" : "execute",
-                })
-              }
-            />{" "}
-            Exploration project
-          </label>
-        </Panel>
-        <Panel title="Trail markers">
-          <form
-            className="flex gap-2"
-            onSubmit={async (e) => {
-              e.preventDefault();
-              if (milestone.trim()) {
-                await createMilestone(project.id, milestone);
-                setMilestone("");
-              }
-            }}
-          >
-            <input
-              className="field flex-1"
-              value={milestone}
-              onChange={(e) => setMilestone(e.target.value)}
-              placeholder="Observable milestone"
-            />
-            <button className="secondary">Add</button>
-          </form>
-          <div className="mt-3 space-y-2">
-            {milestones.map((m) => (
-              <button
-                key={m.id}
-                className="trail-row w-full text-left"
-                onClick={() =>
-                  void updateMilestone(m, {
-                    status: m.status === "done" ? "pending" : "done",
-                  })
-                }
-              >
-                <span
-                  className={
-                    m.status === "done" ? "line-through opacity-60" : ""
-                  }
-                >
-                  {m.title}
-                </span>
-                <span>{m.status === "done" ? "Done" : "Next"}</span>
-              </button>
-            ))}
-          </div>
-        </Panel>
-        <Panel title="Next actions">
-          {tasks.map((t) => (
-            <div key={t.id} className="trail-row">
-              <span>{t.title}</span>
-              <span>{t.nextActionText}</span>
-            </div>
-          ))}
-          {!tasks.length && (
-            <p className="text-sm text-slate-500">
-              No actions yet. Ask Samwise to draft a path.
-            </p>
-          )}
-          <Link
-            className="secondary mt-3 inline-block"
-            to={`/assistant?project=${project.id}`}
-          >
-            Plan with Samwise
-          </Link>
-        </Panel>
-        <Panel title="Field notes and files">
-          <button
-            className="secondary"
-            onClick={() => void createNote(project.id)}
-          >
-            New note
-          </button>
-          {notes.map((n) => (
-            <NoteEditor key={n.id} note={n} />
-          ))}
-          <AttachmentUpload projectId={project.id} />
-          <div className="mt-3 space-y-2">
-            {attachments.map((file) => (
-              <AttachmentLink key={file.id} file={file} />
-            ))}
-          </div>
-        </Panel>
-      </div>
-    </>
-  );
-}
-
-function AttachmentLink({ file }: { file: Attachment }) {
-  const open = async () => {
-    if (!supabase) return;
-    const { data, error } = await supabase.storage
-      .from("attachments")
-      .createSignedUrl(file.storagePath, 60);
-    if (!error) window.open(data.signedUrl, "_blank", "noopener,noreferrer");
-  };
-  return (
-    <button className="trail-row w-full text-left" onClick={() => void open()}>
-      <span>{file.filename}</span>
-      <span>{Math.ceil(file.sizeBytes / 1024)} KB</span>
-    </button>
-  );
-}
-
-function NoteEditor({ note }: { note: Note }) {
-  return (
-    <article className="mt-3">
+        <span className="truncate font-semibold">{task.title}</span>
+        <PriorityBadge priority={task.priority} short />
+        {showDate && task.plannedForDate && (
+          <span className="text-xs text-slate-500">
+            was {task.plannedForDate}
+          </span>
+        )}
+      </button>
       <input
-        className="field"
-        value={note.title}
-        onChange={(e) => void updateNote(note, { title: e.target.value })}
+        type="date"
+        aria-label={`Choose a day for ${task.title}`}
+        className="field w-40 shrink-0"
+        value=""
+        onChange={(e) => e.target.value && void planTask(task, e.target.value)}
       />
-      <textarea
-        className="field mt-2 min-h-28"
-        value={note.markdownContent}
-        onChange={(e) =>
-          void updateNote(note, { markdownContent: e.target.value })
-        }
-      />
-    </article>
-  );
-}
-function AttachmentUpload({ projectId }: { projectId: string }) {
-  const [message, setMessage] = useState("");
-  return (
-    <label className="secondary mt-3 inline-flex cursor-pointer items-center gap-2">
-      <Upload size={16} />
-      Attach file
-      <input
-        className="sr-only"
-        type="file"
-        onChange={async (e) => {
-          const file = e.target.files?.[0];
-          if (!file || !supabase) return;
-          const {
-            data: { user },
-          } = await supabase.auth.getUser();
-          if (!user) return;
-          const attachmentId = id(),
-            path = `${user.id}/${attachmentId}/${file.name}`;
-          const { error } = await supabase.storage
-            .from("attachments")
-            .upload(path, file);
-          if (error) {
-            setMessage(error.message);
-            return;
-          }
-          await createAttachment({
-            projectId,
-            storagePath: path,
-            filename: file.name,
-            mimeType: file.type || "application/octet-stream",
-            sizeBytes: file.size,
-          });
-          setMessage("File attached privately.");
-        }}
-      />
-      {message && <span className="text-xs">{message}</span>}
-    </label>
+    </div>
   );
 }
 
@@ -544,13 +311,13 @@ function DirectionCard({
           {direction.status}
         </button>
       </div>
-      <textarea
+      <AutoSaveText
+        key={direction.id}
+        multiline
         className="field mt-3"
         value={direction.description}
         placeholder="What would make this meaningfully better?"
-        onChange={(e) =>
-          void updateDirection(direction, { description: e.target.value })
-        }
+        onSave={(description) => void updateDirection(direction, { description })}
       />
       {goals.map((g) => (
         <div key={g.id} className="trail-row mt-2">
@@ -621,7 +388,8 @@ export function Reviews() {
         </Panel>
         <Panel title="Weekly reset">
           <p className="text-sm">
-            Process the Inbox, review stalled work, then choose 1–3 outcomes.
+            Organise the leftover tasks on the Plan tab, then choose 1–3
+            outcomes for the coming week.
           </p>
           <button
             className="secondary mt-3"
@@ -653,7 +421,8 @@ export function Reviews() {
 
 export function Insights() {
   const tasks = useTasks(),
-    events = useTaskEvents();
+    events = useTaskEvents(),
+    projects = useProjects();
   const rows = useMemo(
     () =>
       tasks
@@ -673,7 +442,10 @@ export function Insights() {
   const groups = rows
     .filter((row) => row.actual)
     .reduce<Record<string, number[]>>((all, row) => {
-      const group = row.projectId || row.context || "Uncategorised";
+      const group = row.projectId
+        ? (projects.find((p) => p.id === row.projectId)?.title ??
+          "Removed plan")
+        : row.context || "Uncategorised";
       (all[group] ??= []).push(row.actual);
       return all;
     }, {});
@@ -689,7 +461,7 @@ export function Insights() {
       />
       <div className="mt-7 grid gap-4 sm:grid-cols-3">
         <Stat label="Completed" value={completed} />
-        <Stat label="Deferral decisions" value={deferred} />
+        <Stat label="Replanned" value={deferred} />
         <Stat
           label="Timed samples"
           value={rows.filter((r) => r.actual).length}
@@ -777,16 +549,6 @@ export function Settings() {
           type="number"
           value={profile.reservePercent}
           onChange={(e) => void set({ reservePercent: Number(e.target.value) })}
-        />
-        <Field
-          label="Maximum Today commitments"
-          type="number"
-          min={1}
-          max={3}
-          value={profile.maximumTodayCommitments}
-          onChange={(e) =>
-            void set({ maximumTodayCommitments: Number(e.target.value) })
-          }
         />
         <Field
           label="Preferred focus session"
@@ -931,7 +693,7 @@ export function Assistant() {
     for (const draft of result?.scheduleDrafts || []) {
       const task = tasks.find((item) => item.id === draft.taskId);
       if (task && draft.proposedDate)
-        await planTask(task, draft.proposedDate, draft.commitment);
+        await planTask(task, draft.proposedDate);
     }
     setStatus("Accepted tasks saved.");
     navigate("/today");

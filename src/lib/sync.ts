@@ -1,5 +1,5 @@
 import { db } from "./db";
-import type { SyncEntityType, SyncOperation, Task } from "../types";
+import type { SyncEntityType, SyncOperation } from "../types";
 import { id, now } from "./ids";
 import { supabase } from "./supabase";
 
@@ -20,22 +20,6 @@ let activeSync: Promise<{
   reason?: string;
   count?: number;
 }> | null = null;
-
-export function mergeTask(local: Task, remote: Task): Task {
-  if (local.status === "done" && remote.status !== "done")
-    return {
-      ...remote,
-      ...local,
-      version: Math.max(local.version, remote.version),
-    };
-  if (remote.status === "done" && local.status !== "done")
-    return {
-      ...local,
-      ...remote,
-      version: Math.max(local.version, remote.version),
-    };
-  return local.updatedAt >= remote.updatedAt ? local : remote;
-}
 
 export function fromServerEntity(
   entityType: RemoteChange["entityType"],

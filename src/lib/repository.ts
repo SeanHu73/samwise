@@ -1,11 +1,7 @@
+import type { EntityTable } from "dexie";
 import { db } from "./db";
 import { getDeviceId, id, now, todayKey } from "./ids";
 import { queueOperation } from "./sync";
-import {
-  rolloverState,
-  type DeferDecision,
-  validateDeferral,
-} from "./rollover";
 import type {
   AgentRun,
   Area,
@@ -202,8 +198,27 @@ export async function saveEntity<T extends EntityBase>(
   );
   return updated;
 }
+// Re-reads the entity inside a transaction so rapid saves of different fields
+// (e.g. two debounced inputs in the task detail panel) never build on a stale
+// copy and silently drop each other's changes.
+function updateFresh<T extends EntityBase>(
+  type: SyncEntityType,
+  table: EntityTable<T, "id">,
+  value: T,
+  fields: Partial<T>,
+) {
+  return db.transaction("rw", table, db.outbox, async () => {
+    const current = ((await table.get(value.id as never)) ?? value) as T;
+    return saveEntity(
+      type,
+      table as { put: (item: T) => PromiseLike<unknown> },
+      current,
+      fields,
+    );
+  });
+}
 export const updateTask = (task: Task, fields: Partial<Task>) =>
-  saveEntity("task", db.tasks, task, fields);
+  updateFresh("task", db.tasks, task, fields);
 export async function deleteTask(task: Task) {
   const deletedAt = now(),
     updated = {
@@ -216,43 +231,34 @@ export async function deleteTask(task: Task) {
   await queue("task", updated, "delete", {}, task.version);
 }
 export const updateProject = (value: Project, fields: Partial<Project>) =>
-  saveEntity("project", db.projects, value, fields);
+  updateFresh("project", db.projects, value, fields);
 export const updateDirection = (value: Direction, fields: Partial<Direction>) =>
-  saveEntity("direction", db.directions, value, fields);
+  updateFresh("direction", db.directions, value, fields);
 export const updateGoal = (value: Goal, fields: Partial<Goal>) =>
-  saveEntity("goal", db.goals, value, fields);
+  updateFresh("goal", db.goals, value, fields);
 export const updateMilestone = (value: Milestone, fields: Partial<Milestone>) =>
-  saveEntity("milestone", db.milestones, value, fields);
+  updateFresh("milestone", db.milestones, value, fields);
 export const updateNote = (value: Note, fields: Partial<Note>) =>
-  saveEntity("note", db.notes, value, fields);
+  updateFresh("note", db.notes, value, fields);
 export const updateArea = (value: Area, fields: Partial<Area>) =>
-  saveEntity("area", db.areas, value, fields);
+  updateFresh("area", db.areas, value, fields);
 
-export async function planTask(task: Task, date: string, commitment = false) {
-  if (commitment) {
-    const profile = await getPlanningProfile();
-    const count = await db.tasks
-      .where("plannedForDate")
-      .equals(date)
-      .filter(
-        (x) => x.isCommitment === true && x.status !== "done" && !x.deletedAt,
-      )
-      .count();
-    if (count >= profile.maximumTodayCommitments)
-      throw new Error(
-        `This day is intentionally limited to ${profile.maximumTodayCommitments} commitments.`,
-      );
-  }
+export async function planTask(task: Task, date: string) {
   const value = await updateTask(task, {
     status: "planned",
     plannedForDate: date,
-    isCommitment: commitment,
     rolloverState: "clear",
   });
-  await event(task.id, "task_planned", { metadata: { date, commitment } });
+  await event(task.id, "task_planned", { metadata: { date } });
   return value;
 }
-export const planToday = (task: Task) => planTask(task, todayKey(), true);
+export const planToday = (task: Task) => planTask(task, todayKey());
+export const unplanTask = (task: Task) =>
+  updateTask(task, {
+    status: "inbox",
+    // null (not undefined) so the cleared field survives JSON and reaches the server.
+    plannedForDate: null as unknown as undefined,
+  });
 export async function completeTask(task: Task, minutes?: number) {
   const value = await updateTask(task, {
     status: "done",
@@ -263,33 +269,12 @@ export async function completeTask(task: Task, minutes?: number) {
   await event(task.id, "task_completed");
   return value;
 }
-export async function deferTask(
-  task: Task,
-  decision: DeferDecision,
-  nextAction?: string,
-  date?: string,
-) {
-  const error = validateDeferral(task, decision, nextAction);
-  if (error) throw new Error(error);
-  const count = task.deferCount + 1;
-  const status =
-    decision === "drop"
-      ? "dropped"
-      : decision === "delegate"
-        ? "delegated"
-        : "deferred";
+export async function dropTask(task: Task) {
   const value = await updateTask(task, {
-    status,
-    deferCount: count,
-    lastDeferReason: decision,
-    nextActionText: nextAction?.trim() || task.nextActionText,
-    plannedForDate: decision === "reschedule" ? date : undefined,
-    isCommitment: false,
-    rolloverState: rolloverState(count),
+    status: "dropped",
+    rolloverState: "clear",
   });
-  await event(task.id, decision === "drop" ? "task_dropped" : "task_deferred", {
-    metadata: { decision },
-  });
+  await event(task.id, "task_dropped");
   return value;
 }
 export async function logTimer(task: Task, minutes: number) {

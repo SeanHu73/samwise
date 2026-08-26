@@ -8,21 +8,25 @@ export function Focus() {
   const task = useLiveQuery(() => (id ? db.tasks.get(id) : undefined), [id]);
   const [seconds, setSeconds] = useState(0),
     [running, setRunning] = useState(true);
-  const started = useRef(Date.now()),
+  // Time from finished run segments; the interval adds the live segment on top,
+  // so pausing genuinely stops the clock.
+  const banked = useRef(0),
     nav = useNavigate();
   useEffect(() => {
-    const timer = setInterval(
-      () =>
-        running &&
-        setSeconds(Math.floor((Date.now() - started.current) / 1000)),
-      1000,
-    );
-    return () => clearInterval(timer);
+    if (!running) return;
+    const startedAt = Date.now();
+    const tick = () =>
+      setSeconds(banked.current + Math.floor((Date.now() - startedAt) / 1000));
+    const timer = setInterval(tick, 1000);
+    return () => {
+      clearInterval(timer);
+      banked.current += Math.floor((Date.now() - startedAt) / 1000);
+    };
   }, [running]);
   if (!task) return <p>Loading focus…</p>;
   const focusTask = task;
   async function finish(done: boolean) {
-    await logTimer(focusTask, Math.max(1, Math.round(seconds / 60)));
+    await logTimer(focusTask, Math.round(seconds / 60));
     if (done) await completeTask(focusTask);
     nav("/today");
   }

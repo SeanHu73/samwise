@@ -1,13 +1,16 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import type { Task } from "../types";
-import { useAvailable, usePlanningProfile, useToday } from "../hooks/useData";
+import { useOverflow, useQuickAdd, useToday } from "../hooks/useData";
 import { TaskRow } from "../components/TaskRow";
-import { DeferDialog } from "../components/DeferDialog";
+import { TaskDetail } from "../components/TaskDetail";
+import { Capture } from "../components/Capture";
 export function Today() {
   const tasks = useToday(),
-    available = useAvailable(),
-    profile = usePlanningProfile();
-  const [defer, setDefer] = useState<Task>();
+    overflow = useOverflow(),
+    quickAdd = useQuickAdd();
+  const [openId, setOpenId] = useState<string>();
+  const open = (task: Task) => setOpenId(task.id);
   return (
     <>
       <header>
@@ -21,27 +24,49 @@ export function Today() {
         </p>
         <h1 className="mt-2 font-serif text-3xl font-bold">Daily Mission</h1>
         <p className="mt-2 text-slate-600">
-          {tasks.length} of {profile?.maximumTodayCommitments ?? 3} commitments
+          {tasks.length} task{tasks.length === 1 ? "" : "s"} for today
         </p>
       </header>
-      <List
-        title="Commitments"
-        empty="Choose up to three actions you genuinely intend to do."
-      >
+      <div className="mt-5 md:hidden">
+        <Capture />
+      </div>
+      <List title="Tasks" empty="Nothing planned yet. Add tasks here or on the Plan tab.">
         {tasks.map((t) => (
-          <TaskRow key={t.id} task={t} onDefer={setDefer} />
+          <TaskRow key={t.id} task={t} onOpen={open} />
         ))}
       </List>
-      <List
-        title="Available next"
-        empty="Process an Inbox item into a concrete next action."
-      >
-        {available.map((t) => (
-          <TaskRow key={t.id} task={t} onDefer={setDefer} showPlan />
-        ))}
-      </List>
-      {defer && (
-        <DeferDialog task={defer} onClose={() => setDefer(undefined)} />
+      {!!overflow.length && (
+        <List
+          title="From earlier days"
+          hint="These didn’t happen. Give each one a new day, or let it go."
+          empty=""
+        >
+          {overflow.map((t) => (
+            <TaskRow key={t.id} task={t} onOpen={open} />
+          ))}
+        </List>
+      )}
+      {!!quickAdd.length && (
+        <List
+          title="Quick Add"
+          hint={
+            <>
+              Captured, but not on a day yet.{" "}
+              <Link to="/plan" className="font-semibold text-moss underline">
+                Organise them in Plan
+              </Link>
+              , or open one to pick its day.
+            </>
+          }
+          empty=""
+        >
+          {quickAdd.map((t) => (
+            <TaskRow key={t.id} task={t} onOpen={open} />
+          ))}
+        </List>
+      )}
+      {openId && (
+        <TaskDetail taskId={openId} onClose={() => setOpenId(undefined)} />
       )}
     </>
   );
@@ -49,22 +74,27 @@ export function Today() {
 function List({
   title,
   empty,
+  hint,
   children,
 }: {
   title: string;
   empty: string;
+  hint?: React.ReactNode;
   children: React.ReactNode[];
 }) {
   return (
     <section className="mt-9 space-y-3">
-      <h2 className="text-lg font-bold">{title}</h2>
-      {children.length ? (
-        children
-      ) : (
-        <div className="rounded-2xl border border-dashed border-sand p-6 text-sm text-slate-500">
-          {empty}
-        </div>
-      )}
+      <div>
+        <h2 className="text-lg font-bold">{title}</h2>
+        {hint && <p className="mt-1 text-sm text-slate-600">{hint}</p>}
+      </div>
+      {children.length
+        ? children
+        : !!empty && (
+            <div className="rounded-2xl border border-dashed border-sand p-6 text-sm text-slate-500">
+              {empty}
+            </div>
+          )}
     </section>
   );
 }

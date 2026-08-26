@@ -1,6 +1,5 @@
 import { useState, type FormEvent } from "react";
 import { captureTask } from "../lib/repository";
-import { assessCapturedTask } from "../lib/captureAssessment";
 export function Capture({ compact = false }: { compact?: boolean }) {
   const [title, setTitle] = useState("");
   const [choosingPriority, setChoosingPriority] = useState(false);
@@ -11,16 +10,11 @@ export function Capture({ compact = false }: { compact?: boolean }) {
     setChoosingPriority(true);
   }
   async function save(priority: 1 | 2 | 3 | 4) {
-    const task = await captureTask(title, {
-      priority,
-      status: "next",
-      nextActionText: title.trim(),
-    });
+    await captureTask(title, { priority });
     setTitle("");
     setChoosingPriority(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 1800);
-    void assessCapturedTask(task);
   }
   return (
     <form

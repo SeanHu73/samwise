@@ -1,8 +1,10 @@
 import { Check, Clock3, Play } from "lucide-react";
+import { Link } from "react-router-dom";
 import type { Task } from "../types";
 import { completeTask, planToday } from "../lib/repository";
-import { Link } from "react-router-dom";
+import { todayKey } from "../lib/ids";
 import { useAreas, useProjects } from "../hooks/useData";
+import { PriorityBadge } from "./PriorityBadge";
 const palette = [
   "#315C4C",
   "#A75436",
@@ -13,12 +15,10 @@ const palette = [
 ];
 export function TaskRow({
   task,
-  onDefer,
-  showPlan = false,
+  onOpen,
 }: {
   task: Task;
-  onDefer: (task: Task) => void;
-  showPlan?: boolean;
+  onOpen: (task: Task) => void;
 }) {
   const areas = useAreas(),
     area = areas.find((item) => item.id === task.areaId),
@@ -54,13 +54,26 @@ export function TaskRow({
           <Check size={20} />
         </button>
         <div className="min-w-0 flex-1">
-          <h3 className="font-semibold text-ink">{task.title}</h3>
-          {area && (
-            <span className="quiet-label mt-1 inline-block">{area.name}</span>
-          )}
-          {task.nextActionText && (
-            <p className="mt-1 text-sm text-slate-600">{task.nextActionText}</p>
-          )}
+          <button
+            type="button"
+            onClick={() => onOpen(task)}
+            className="block w-full text-left"
+          >
+            <span className="flex flex-wrap items-center gap-2">
+              <span className="font-semibold text-ink group-hover:underline">
+                {task.title}
+              </span>
+              <PriorityBadge priority={task.priority} />
+            </span>
+            {area && (
+              <span className="quiet-label mt-1 inline-block">{area.name}</span>
+            )}
+            {task.descriptionMarkdown && (
+              <span className="mt-1 line-clamp-1 block text-sm text-slate-600">
+                {task.descriptionMarkdown}
+              </span>
+            )}
+          </button>
           <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
             <span className="inline-flex items-center gap-1 text-slate-500">
               <Clock3 size={15} />
@@ -77,20 +90,20 @@ export function TaskRow({
               <Play size={15} />
               Focus
             </Link>
-            <button
-              onClick={() => onDefer(task)}
-              className="min-h-11 rounded-lg px-3 text-slate-600 hover:bg-sand/50"
-            >
-              Replan
-            </button>
-            {showPlan && (
+            {task.plannedForDate !== todayKey() && (
               <button
-                onClick={() => planToday(task).catch((e) => alert(e.message))}
+                onClick={() => void planToday(task)}
                 className="min-h-11 rounded-lg px-3 text-sage hover:bg-sand/50"
               >
-                Commit today
+                Do today
               </button>
             )}
+            <button
+              onClick={() => onOpen(task)}
+              className="min-h-11 rounded-lg px-3 text-slate-600 hover:bg-sand/50"
+            >
+              Details
+            </button>
           </div>
         </div>
       </div>

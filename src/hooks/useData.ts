@@ -3,45 +3,44 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../lib/db";
 import { todayKey } from "../lib/ids";
 import { getPlanningProfile } from "../lib/repository";
-export const useInbox = () =>
-  useLiveQuery(
-    () =>
-      db.tasks
-        .where("status")
-        .equals("inbox")
-        .filter((x) => !x.deletedAt)
-        .sortBy("sortOrder"),
-    [],
-    [],
-  );
+import type { Task } from "../types";
+
+const active = (task: Task) =>
+  !task.deletedAt && task.status !== "done" && task.status !== "dropped";
+
 export const useToday = () =>
   useLiveQuery(
     () =>
       db.tasks
         .where("plannedForDate")
         .equals(todayKey())
-        .filter(
-          (x) =>
-            !x.deletedAt &&
-            x.status !== "done" &&
-            x.status !== "dropped" &&
-            x.isCommitment !== false,
-        )
+        .filter(active)
         .sortBy("sortOrder"),
     [],
     [],
   );
-export const useAvailable = () =>
+/** Tasks planned for an earlier day that never got finished. */
+export const useOverflow = () =>
   useLiveQuery(
     () =>
       db.tasks
         .filter(
-          (x) =>
-            !x.deletedAt &&
-            (x.status === "next" ||
-              (x.status === "planned" &&
-                x.plannedForDate === todayKey() &&
-                x.isCommitment === false)),
+          (task) =>
+            active(task) &&
+            !!task.plannedForDate &&
+            task.plannedForDate < todayKey(),
+        )
+        .sortBy("plannedForDate"),
+    [],
+    [],
+  );
+/** Quick-added tasks that have not been placed on a day yet. */
+export const useQuickAdd = () =>
+  useLiveQuery(
+    () =>
+      db.tasks
+        .filter(
+          (task) => active(task) && !task.plannedForDate && !task.projectId,
         )
         .sortBy("sortOrder"),
     [],

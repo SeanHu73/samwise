@@ -13,6 +13,10 @@ import {
   updateProject,
 } from "../lib/repository";
 import { supabase } from "../lib/supabase";
+import { dateKey } from "../lib/ids";
+import { AutoSaveText } from "../components/AutoSaveText";
+import { PriorityBadge } from "../components/PriorityBadge";
+import { TaskDetail } from "../components/TaskDetail";
 import type { Project, Task } from "../types";
 
 const palette = [
@@ -23,8 +27,6 @@ const palette = [
   "#9A7438",
   "#44705D",
 ];
-const dateKey = (date: Date) =>
-  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 const projectColor = (project: Project, areas: ReturnType<typeof useAreas>) => {
   const areaColor = areas.find((area) => area.id === project.areaId)?.color;
   if (areaColor) return areaColor;
@@ -348,7 +350,9 @@ export function BigPicture() {
                       })}
                     </p>
                   </div>
-                  <span>{weekTasks.length} tasks</span>
+                  <span>
+                    {weekTasks.length} task{weekTasks.length === 1 ? "" : "s"}
+                  </span>
                 </button>
               );
             })}
@@ -456,7 +460,8 @@ export function BigPictureDetail() {
     [taskTitle, setTaskTitle] = useState(""),
     [taskDateValue, setTaskDateValue] = useState(""),
     [taskMilestone, setTaskMilestone] = useState(""),
-    [priority, setPriority] = useState<1 | 2 | 3 | 4>(3);
+    [priority, setPriority] = useState<1 | 2 | 3 | 4>(3),
+    [openTaskId, setOpenTaskId] = useState<string>();
   if (!project) return <p>Big Picture plan not found.</p>;
   const color = projectColor(project, areas);
   return (
@@ -480,22 +485,22 @@ export function BigPictureDetail() {
           <h2 className="font-serif text-xl font-bold">
             Outcome and finish line
           </h2>
-          <textarea
+          <AutoSaveText
+            key={`purpose-${project.id}`}
+            multiline
             className="field mt-4 min-h-24"
             value={project.purpose}
             placeholder="Why does this matter?"
-            onChange={(event) =>
-              void updateProject(project, { purpose: event.target.value })
-            }
+            onSave={(purpose) => void updateProject(project, { purpose })}
           />
-          <textarea
+          <AutoSaveText
+            key={`dod-${project.id}`}
+            multiline
             className="field mt-3 min-h-24"
             value={project.definitionOfDone}
             placeholder="What will visibly be true when this is done?"
-            onChange={(event) =>
-              void updateProject(project, {
-                definitionOfDone: event.target.value,
-              })
+            onSave={(definitionOfDone) =>
+              void updateProject(project, { definitionOfDone })
             }
           />
           <label className="mt-3 grid gap-1 text-sm font-semibold">
@@ -642,23 +647,38 @@ export function BigPictureDetail() {
           </form>
           <div className="mt-4 grid gap-2 md:grid-cols-2">
             {tasks.map((task) => (
-              <div
+              <button
                 key={task.id}
-                className="rounded-xl border-l-4 p-3 text-sm"
+                type="button"
+                onClick={() => setOpenTaskId(task.id)}
+                className="rounded-xl border-l-4 p-3 text-left text-sm"
                 style={{
                   borderColor: color,
                   background: `color-mix(in srgb, ${color} ${18 + (4 - task.priority) * 8}%, white)`,
                 }}
               >
-                <strong>{task.title}</strong>
+                <span className="flex flex-wrap items-center gap-2">
+                  <strong>{task.title}</strong>
+                  <PriorityBadge priority={task.priority} short />
+                </span>
                 <p className="mt-1 text-xs text-slate-600">
-                  {task.dueDate || "Available next"} · Priority {task.priority}
+                  {task.plannedForDate
+                    ? `Planned ${task.plannedForDate}`
+                    : task.dueDate
+                      ? `Due ${task.dueDate}`
+                      : "Not scheduled"}
                 </p>
-              </div>
+              </button>
             ))}
           </div>
         </section>
       </div>
+      {openTaskId && (
+        <TaskDetail
+          taskId={openTaskId}
+          onClose={() => setOpenTaskId(undefined)}
+        />
+      )}
     </>
   );
 }

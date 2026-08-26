@@ -1,7 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { Today } from "./pages/Today";
-import { InboxPage } from "./pages/InboxPage";
 import { Focus } from "./pages/Focus";
 import { BigPicture, BigPictureDetail } from "./pages/BigPicture";
 import {
@@ -18,7 +17,6 @@ export default function App() {
     <Routes>
       <Route element={<Layout />}>
         <Route path="/today" element={<Today />} />
-        <Route path="/inbox" element={<InboxPage />} />
         <Route path="/plan" element={<Plan />} />
         <Route path="/projects" element={<BigPicture />} />
         <Route path="/projects/:id" element={<BigPictureDetail />} />

@@ -4,7 +4,6 @@ import {
   CalendarDays,
   Compass,
   FolderKanban,
-  Inbox,
   Map,
   MoreHorizontal,
   Plus,
@@ -16,11 +15,10 @@ import {
 } from "lucide-react";
 import { NavLink, Outlet } from "react-router-dom";
 import { Capture } from "./Capture";
-import { useInbox, useOutboxCount } from "../hooks/useData";
+import { useOutboxCount, useOverflow, useQuickAdd } from "../hooks/useData";
 import { syncNow } from "../lib/sync";
 const nav = [
   ["/today", "Today", Sun],
-  ["/inbox", "Inbox", Inbox],
   ["/plan", "Plan", CalendarDays],
   ["/projects", "Big Picture", FolderKanban],
   ["/map", "Long-term map", Map],
@@ -31,7 +29,7 @@ const nav = [
   ["/settings", "Settings", Settings],
 ] as const;
 export function Layout() {
-  const inbox = useInbox(),
+  const unorganised = useOverflow().length + useQuickAdd().length,
     pending = useOutboxCount(),
     [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   useEffect(() => {
@@ -74,9 +72,9 @@ export function Layout() {
             >
               <Icon size={18} />
               <span>{label}</span>
-              {label === "Inbox" && !!inbox.length && (
+              {label === "Plan" && !!unorganised && (
                 <span className="ml-auto rounded-full bg-ember px-2 text-xs text-white">
-                  {inbox.length}
+                  {unorganised}
                 </span>
               )}
             </NavLink>
@@ -138,9 +136,9 @@ export function Layout() {
                 >
                   <Icon size={19} />
                   <span>{label}</span>
-                  {label === "Inbox" && !!inbox.length && (
+                  {label === "Plan" && !!unorganised && (
                     <span className="ml-auto rounded-full bg-ember px-2 text-xs text-white">
-                      {inbox.length}
+                      {unorganised}
                     </span>
                   )}
                 </NavLink>
@@ -172,7 +170,7 @@ export function Layout() {
         </button>
         <MobileLink to="/today" label="Today" Icon={Sun} />
         <NavLink
-          to="/inbox"
+          to="/today"
           aria-label="Capture"
           className="grid place-items-center"
         >
