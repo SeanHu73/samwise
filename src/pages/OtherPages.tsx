@@ -6,6 +6,7 @@ import {
   FileText,
   Map,
   Mountain,
+  Plus,
   ScrollText,
   Sparkles,
 } from "lucide-react";
@@ -96,7 +97,8 @@ export function Plan() {
   const tasks = useTasks(),
     overflow = useOverflow(),
     quickAdd = useQuickAdd(),
-    [openId, setOpenId] = useState<string>();
+    [openId, setOpenId] = useState<string>(),
+    [addingFor, setAddingFor] = useState<string>();
   const days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() + i);
@@ -121,16 +123,17 @@ export function Plan() {
             : `${overflow.length} task${overflow.length === 1 ? "" : "s"} from earlier days ${overflow.length === 1 ? "is" : "are"} waiting below for a new day.`}
         </p>
       )}
-      <div className="mt-7 grid gap-4 lg:grid-cols-2">
+      <div className="mt-5 grid grid-cols-1 gap-2 sm:mt-7 sm:gap-4 lg:grid-cols-2">
         {days.map((date) => {
           const key = dateKey(date),
             planned = tasks.filter(
               (t) => t.plannedForDate === key && activeStatus(t),
-            );
+            ),
+            adding = addingFor === key;
           return (
-            <section key={key} className="journey-card p-4 sm:p-5 lg:min-h-44">
-              <div>
-                <h2 className="font-serif text-lg font-bold">
+            <section key={key} className="journey-card p-3 sm:p-5 lg:min-h-44">
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="font-serif text-base font-bold sm:text-lg">
                   {key === todayKey() ? "Today · " : ""}
                   {new Intl.DateTimeFormat(undefined, {
                     weekday: "long",
@@ -138,46 +141,63 @@ export function Plan() {
                     day: "numeric",
                   }).format(date)}
                 </h2>
-              </div>
-              <div className="mt-3 space-y-2">
-                {planned.map((t) => (
-                  <button
-                    key={t.id}
-                    type="button"
-                    onClick={() => open(t)}
-                    className="trail-row w-full text-left hover:border-moss/50"
-                  >
-                    <span className="flex min-w-0 items-center gap-2">
-                      <span className="truncate">{t.title}</span>
-                      <PriorityBadge priority={t.priority} short />
-                    </span>
-                    <span>
-                      {t.estimatedMinutes ? `${t.estimatedMinutes}m` : ""}
-                    </span>
-                  </button>
-                ))}
-                {!planned.length && (
-                  <p className="text-sm text-slate-500">Room for reality.</p>
-                )}
-              </div>
-              <DayAdd date={key} />
-              {!!unplanned.length && (
-                <select
-                  aria-label={`Move an existing task to ${key}`}
-                  className="field mt-2"
-                  value=""
-                  onChange={(e) => {
-                    const task = tasks.find((t) => t.id === e.target.value);
-                    if (task) void planTask(task, key);
-                  }}
+                <button
+                  type="button"
+                  aria-label={`Add a task to ${key}`}
+                  aria-expanded={adding}
+                  onClick={() => setAddingFor(adding ? undefined : key)}
+                  className={`grid size-9 shrink-0 place-items-center rounded-full border ${adding ? "border-moss bg-moss text-white" : "border-moss/30 text-moss hover:bg-mist"}`}
                 >
-                  <option value="">Or pick an existing task…</option>
-                  {unplanned.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.title}
-                    </option>
+                  <Plus size={17} />
+                </button>
+              </div>
+              {!!planned.length && (
+                <div className="mt-2 space-y-1.5 sm:mt-3 sm:space-y-2">
+                  {planned.map((t) => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => open(t)}
+                      className="trail-row w-full text-left hover:border-moss/50"
+                    >
+                      <span className="flex min-w-0 items-center gap-2">
+                        <span className="truncate">{t.title}</span>
+                        <PriorityBadge priority={t.priority} short />
+                      </span>
+                      <span>
+                        {t.estimatedMinutes ? `${t.estimatedMinutes}m` : ""}
+                      </span>
+                    </button>
                   ))}
-                </select>
+                </div>
+              )}
+              {!planned.length && !adding && (
+                <p className="mt-1 hidden text-sm text-slate-500 sm:block">
+                  Room for reality.
+                </p>
+              )}
+              {adding && (
+                <>
+                  <DayAdd date={key} autoFocus />
+                  {!!unplanned.length && (
+                    <select
+                      aria-label={`Move an existing task to ${key}`}
+                      className="field mt-2"
+                      value=""
+                      onChange={(e) => {
+                        const task = tasks.find((t) => t.id === e.target.value);
+                        if (task) void planTask(task, key);
+                      }}
+                    >
+                      <option value="">Or pick an existing task…</option>
+                      {unplanned.map((t) => (
+                        <option key={t.id} value={t.id}>
+                          {t.title}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </>
               )}
             </section>
           );
@@ -215,7 +235,7 @@ export function Plan() {
     </>
   );
 }
-function DayAdd({ date }: { date: string }) {
+function DayAdd({ date, autoFocus }: { date: string; autoFocus?: boolean }) {
   const [title, setTitle] = useState("");
   return (
     <form
@@ -234,6 +254,7 @@ function DayAdd({ date }: { date: string }) {
         onChange={(e) => setTitle(e.target.value)}
         placeholder="Add a new task…"
         aria-label={`New task for ${date}`}
+        autoFocus={autoFocus}
       />
       <button className="secondary shrink-0">Add</button>
     </form>
