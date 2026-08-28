@@ -6,6 +6,7 @@ import {
   deleteTask,
   dropTask,
   planTask,
+  reopenTask,
   unplanTask,
   updateTask,
 } from "../lib/repository";
@@ -179,16 +180,29 @@ export function TaskDetail({
               Drop it
             </button>
           </div>
-          <button
-            type="button"
-            className="primary"
-            onClick={() => {
-              void completeTask(task);
-              onClose();
-            }}
-          >
-            Mark done
-          </button>
+          {task.status === "done" ? (
+            <button
+              type="button"
+              className="primary"
+              onClick={() => {
+                void reopenTask(task);
+                onClose();
+              }}
+            >
+              Reopen
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="primary"
+              onClick={() => {
+                void completeTask(task);
+                onClose();
+              }}
+            >
+              Mark done
+            </button>
+          )}
         </div>
       </div>
     </div>

@@ -259,6 +259,14 @@ export const unplanTask = (task: Task) =>
     // null (not undefined) so the cleared field survives JSON and reaches the server.
     plannedForDate: null as unknown as undefined,
   });
+export async function reopenTask(task: Task) {
+  const value = await updateTask(task, {
+    status: task.plannedForDate ? "planned" : "inbox",
+    completedAt: null as unknown as undefined,
+  });
+  await event(task.id, "task_reactivated");
+  return value;
+}
 export async function completeTask(task: Task, minutes?: number) {
   const value = await updateTask(task, {
     status: "done",

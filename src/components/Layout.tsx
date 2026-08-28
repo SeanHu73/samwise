@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   BarChart3,
   CalendarDays,
+  CheckCircle2,
   Compass,
   FolderKanban,
   Map,
@@ -21,6 +22,7 @@ const nav = [
   ["/today", "Today", Sun],
   ["/plan", "Plan", CalendarDays],
   ["/projects", "Big Picture", FolderKanban],
+  ["/done", "Completed", CheckCircle2],
   ["/map", "Long-term map", Map],
   ["/reviews", "Reviews", ScrollText],
   ["/insights", "Insights", BarChart3],

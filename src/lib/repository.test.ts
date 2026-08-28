@@ -2,11 +2,14 @@ import { describe, expect, it } from "vitest";
 import { db } from "./db";
 import {
   captureTask,
+  completeTask,
   createArea,
   createMilestone,
   createProject,
   deleteTask,
   getPlanningProfile,
+  planTask,
+  reopenTask,
   swapTaskOrder,
   updateTask,
 } from "./repository";
@@ -63,6 +66,19 @@ describe("task organization", () => {
 
     expect((await db.tasks.get(first.id))?.sortOrder).toBe(200);
     expect((await db.tasks.get(second.id))?.sortOrder).toBe(100);
+  });
+
+  it("completes and reopens a task", async () => {
+    const captured = await captureTask("Water the plants");
+    const planned = await planTask(captured, "2026-08-27");
+    const done = await completeTask(planned);
+    expect(done.status).toBe("done");
+    expect(done.completedAt).toBeTruthy();
+
+    await reopenTask(done);
+    const reopened = await db.tasks.get(captured.id);
+    expect(reopened?.status).toBe("planned");
+    expect(reopened?.completedAt).toBeNull();
   });
 
   it("stores target dates used by reverse planning", async () => {

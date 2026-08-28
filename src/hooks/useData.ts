@@ -46,6 +46,25 @@ export const useQuickAdd = () =>
     [],
     [],
   );
+/** Finished tasks, newest completion first. */
+export const useCompleted = () =>
+  useLiveQuery(
+    () =>
+      db.tasks
+        .where("status")
+        .equals("done")
+        .filter((x) => !x.deletedAt)
+        .toArray()
+        .then((list) =>
+          list.sort((a, b) =>
+            (b.completedAt ?? b.updatedAt).localeCompare(
+              a.completedAt ?? a.updatedAt,
+            ),
+          ),
+        ),
+    [],
+    [],
+  );
 export const useProjects = () =>
   useLiveQuery(
     () => db.projects.filter((x) => !x.deletedAt).sortBy("updatedAt"),

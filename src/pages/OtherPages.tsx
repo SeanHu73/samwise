@@ -513,7 +513,12 @@ export function Insights() {
         .filter((t) => t.actual || t.estimatedMinutes),
     [tasks, events],
   );
-  const completed = tasks.filter((t) => t.status === "done").length,
+  // Counted from events so clearing the Completed page keeps the history.
+  const completed = new Set(
+      events
+        .filter((e) => e.type === "task_completed")
+        .map((e) => e.taskId),
+    ).size,
     deferred = events.filter((e) => e.type === "task_deferred").length;
   const groups = rows
     .filter((row) => row.actual)
