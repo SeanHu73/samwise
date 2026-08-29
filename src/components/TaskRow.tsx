@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import type { Task } from "../types";
 import { completeTask, planToday } from "../lib/repository";
 import { todayKey } from "../lib/ids";
+import { taskOnDay } from "../lib/taskDays";
 import { useAreas, useProjects } from "../hooks/useData";
 import { PriorityBadge } from "./PriorityBadge";
 const palette = [
@@ -94,7 +95,7 @@ export function TaskRow({
               <Play size={15} />
               Focus
             </Link>
-            {task.plannedForDate !== todayKey() && (
+            {!taskOnDay(task, todayKey()) && (
               <button
                 onClick={() => void planToday(task)}
                 className="min-h-11 rounded-lg px-3 text-sage hover:bg-sand/50"

@@ -35,7 +35,13 @@ Functions; OpenAI (via the `planner` Edge Function) for optional AI planning.
   `plannedForDate`. Day-less, project-less active tasks are "Quick Add" and
   appear at the bottom of Today and Plan until the user gives them a day
   (`planTask`) — there is no separate Inbox page anymore.
-- **Overflow**: active tasks whose `plannedForDate` is in the past show under
+- **Multi-day planning**: a task can be scheduled onto several work days.
+  `plannedForDates` (sorted array, server column `planned_for_dates` jsonb)
+  holds them all; `plannedForDate` stays the first day for index/sync compat.
+  Always go through `setPlannedDays` and the helpers in
+  [src/lib/taskDays.ts](src/lib/taskDays.ts) (`taskDays`/`taskOnDay`/
+  `isOverflow`) — never compare `plannedForDate` directly.
+- **Overflow**: active tasks whose every planned day is in the past show under
   "From earlier days" on Today and Plan. Nothing rolls over silently and
   nothing disappears.
 - Task editing happens in [TaskDetail](src/components/TaskDetail.tsx)

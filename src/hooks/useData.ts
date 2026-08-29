@@ -3,6 +3,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../lib/db";
 import { todayKey } from "../lib/ids";
 import { getPlanningProfile } from "../lib/repository";
+import { isOverflow, taskDays, taskOnDay } from "../lib/taskDays";
 import type { Task } from "../types";
 
 const active = (task: Task) =>
@@ -12,24 +13,17 @@ export const useToday = () =>
   useLiveQuery(
     () =>
       db.tasks
-        .where("plannedForDate")
-        .equals(todayKey())
-        .filter(active)
+        .filter((task) => active(task) && taskOnDay(task, todayKey()))
         .sortBy("sortOrder"),
     [],
     [],
   );
-/** Tasks planned for an earlier day that never got finished. */
+/** Tasks whose every planned day is behind us, still unfinished. */
 export const useOverflow = () =>
   useLiveQuery(
     () =>
       db.tasks
-        .filter(
-          (task) =>
-            active(task) &&
-            !!task.plannedForDate &&
-            task.plannedForDate < todayKey(),
-        )
+        .filter((task) => active(task) && isOverflow(task, todayKey()))
         .sortBy("plannedForDate"),
     [],
     [],
@@ -40,7 +34,8 @@ export const useQuickAdd = () =>
     () =>
       db.tasks
         .filter(
-          (task) => active(task) && !task.plannedForDate && !task.projectId,
+          (task) =>
+            active(task) && !taskDays(task).length && !task.projectId,
         )
         .sortBy("sortOrder"),
     [],

@@ -10,6 +10,7 @@ import {
   getPlanningProfile,
   planTask,
   reopenTask,
+  setPlannedDays,
   swapTaskOrder,
   updateTask,
 } from "./repository";
@@ -66,6 +67,22 @@ describe("task organization", () => {
 
     expect((await db.tasks.get(first.id))?.sortOrder).toBe(200);
     expect((await db.tasks.get(second.id))?.sortOrder).toBe(100);
+  });
+
+  it("plans a task across multiple days", async () => {
+    const task = await captureTask("Draft the essay");
+    const planned = await setPlannedDays(task, ["2026-08-30", "2026-08-28"]);
+    expect(planned.status).toBe("planned");
+    expect(planned.plannedForDate).toBe("2026-08-28");
+    expect(planned.plannedForDates).toEqual(["2026-08-28", "2026-08-30"]);
+
+    const single = await setPlannedDays(planned, ["2026-08-30"]);
+    expect(single.plannedForDate).toBe("2026-08-30");
+
+    const cleared = await setPlannedDays(single, []);
+    expect(cleared.status).toBe("inbox");
+    expect(cleared.plannedForDate).toBeNull();
+    expect(cleared.plannedForDates).toBeNull();
   });
 
   it("completes and reopens a task", async () => {

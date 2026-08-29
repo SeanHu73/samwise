@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { Today } from "./pages/Today";
+import { AllTasks } from "./pages/AllTasks";
 import { Completed } from "./pages/Completed";
 import { Focus } from "./pages/Focus";
 import { BigPicture, BigPictureDetail } from "./pages/BigPicture";
@@ -21,6 +22,7 @@ export default function App() {
         <Route path="/plan" element={<Plan />} />
         <Route path="/projects" element={<BigPicture />} />
         <Route path="/projects/:id" element={<BigPictureDetail />} />
+        <Route path="/tasks" element={<AllTasks />} />
         <Route path="/done" element={<Completed />} />
         <Route path="/map" element={<LongTerm />} />
         <Route path="/reviews" element={<Reviews />} />

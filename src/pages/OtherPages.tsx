@@ -30,6 +30,7 @@ import { supabase } from "../lib/supabase";
 import { fromServerEntity } from "../lib/sync";
 import { durationProfile } from "../lib/duration";
 import { dateKey, todayKey } from "../lib/ids";
+import { taskDays, taskOnDay } from "../lib/taskDays";
 import {
   useActiveAreas,
   useCalendarEvents,
@@ -108,7 +109,7 @@ export function Plan() {
     return d;
   });
   const unplanned = tasks.filter(
-    (t) => activeStatus(t) && !t.plannedForDate,
+    (t) => activeStatus(t) && !taskDays(t).length,
   );
   const weekend = [0, 6].includes(new Date().getDay());
   const open = (task: Task) => setOpenId(task.id);
@@ -130,7 +131,7 @@ export function Plan() {
         {days.map((date) => {
           const key = dateKey(date),
             planned = tasks
-              .filter((t) => t.plannedForDate === key && activeStatus(t))
+              .filter((t) => taskOnDay(t, key) && activeStatus(t))
               .sort((a, b) => a.sortOrder - b.sortOrder),
             adding = addingFor === key;
           return (

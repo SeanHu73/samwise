@@ -5,11 +5,11 @@ import {
   completeTask,
   deleteTask,
   dropTask,
-  planTask,
   reopenTask,
-  unplanTask,
+  setPlannedDays,
   updateTask,
 } from "../lib/repository";
+import { taskDays } from "../lib/taskDays";
 import { useActiveAreas, useProjects } from "../hooks/useData";
 import { AutoSaveText } from "./AutoSaveText";
 import { priorityLabels } from "../lib/priority";
@@ -26,8 +26,7 @@ export function TaskDetail({
   const areas = useActiveAreas();
   const project = useProjects().find((item) => item.id === task?.projectId);
   if (!task || task.deletedAt) return null;
-  const setDay = (date: string) =>
-    date ? planTask(task, date) : unplanTask(task);
+  const days = taskDays(task);
   return (
     <div
       className="fixed inset-0 z-50 grid place-items-end bg-ink/35 sm:place-items-center sm:p-4"
@@ -84,16 +83,54 @@ export function TaskDetail({
             ))}
           </div>
         </fieldset>
+        <fieldset className="mt-4">
+          <legend className="mb-1 text-sm font-semibold">
+            Planned days
+          </legend>
+          {!!days.length && (
+            <div className="mb-2 flex flex-wrap gap-2">
+              {days.map((day) => (
+                <span
+                  key={day}
+                  className="inline-flex items-center gap-1 rounded-full bg-moss/10 py-1 pl-3 pr-1 text-xs font-semibold text-moss"
+                >
+                  {new Intl.DateTimeFormat(undefined, {
+                    weekday: "short",
+                    month: "short",
+                    day: "numeric",
+                  }).format(new Date(`${day}T12:00:00`))}
+                  <button
+                    type="button"
+                    aria-label={`Remove ${day}`}
+                    onClick={() =>
+                      void setPlannedDays(
+                        task,
+                        days.filter((d) => d !== day),
+                      )
+                    }
+                    className="grid size-6 place-items-center rounded-full hover:bg-moss/20"
+                  >
+                    <X size={13} />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+          <input
+            className="field"
+            type="date"
+            value=""
+            aria-label="Add a planned day"
+            onChange={(event) =>
+              event.target.value &&
+              void setPlannedDays(task, [...days, event.target.value])
+            }
+          />
+          <p className="mt-1 text-xs font-normal text-slate-500">
+            Pick a date to add a work day; a task can have several.
+          </p>
+        </fieldset>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          <label className="grid gap-1 text-sm font-semibold">
-            Planned day
-            <input
-              className="field"
-              type="date"
-              value={task.plannedForDate ?? ""}
-              onChange={(event) => void setDay(event.target.value)}
-            />
-          </label>
           <label className="grid gap-1 text-sm font-semibold">
             Due date
             <input

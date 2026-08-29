@@ -71,7 +71,10 @@ export interface Task extends EntityBase {
   estimateConfidence: "low" | "medium" | "high";
   dueDate?: string;
   earliestStartDate?: string;
+  /** First planned day (kept for sync/index compatibility). */
   plannedForDate?: string;
+  /** All planned work days, sorted ascending; superset of plannedForDate. */
+  plannedForDates?: string[];
   isCommitment?: boolean;
   nextActionText: string;
   deferCount: number;

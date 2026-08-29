@@ -2,6 +2,7 @@ import type { EntityTable } from "dexie";
 import { db } from "./db";
 import { getDeviceId, id, now, todayKey } from "./ids";
 import { queueOperation } from "./sync";
+import { taskDays } from "./taskDays";
 import type {
   AgentRun,
   Area,
@@ -243,25 +244,34 @@ export const updateNote = (value: Note, fields: Partial<Note>) =>
 export const updateArea = (value: Area, fields: Partial<Area>) =>
   updateFresh("area", db.areas, value, fields);
 
-export async function planTask(task: Task, date: string) {
+/** Replace a task's planned work days. Empty array returns it to Quick Add. */
+export async function setPlannedDays(task: Task, days: string[]) {
+  const sorted = [...new Set(days)].sort();
   const value = await updateTask(task, {
-    status: "planned",
-    plannedForDate: date,
+    status: sorted.length ? "planned" : "inbox",
+    // null (not undefined) so cleared fields survive JSON and reach the server.
+    plannedForDate: (sorted[0] ?? null) as unknown as undefined,
+    plannedForDates: (sorted.length ? sorted : null) as unknown as undefined,
     rolloverState: "clear",
   });
-  await event(task.id, "task_planned", { metadata: { date } });
+  if (sorted.length)
+    await event(task.id, "task_planned", { metadata: { days: sorted } });
   return value;
 }
-export const planToday = (task: Task) => planTask(task, todayKey());
-export const unplanTask = (task: Task) =>
-  updateTask(task, {
-    status: "inbox",
-    // null (not undefined) so the cleared field survives JSON and reaches the server.
-    plannedForDate: null as unknown as undefined,
-  });
+export const planTask = (task: Task, date: string) =>
+  setPlannedDays(task, [date]);
+/** Put the task on today, keeping any future work days it already has. */
+export const planToday = (task: Task) => {
+  const today = todayKey();
+  return setPlannedDays(task, [
+    ...taskDays(task).filter((day) => day > today),
+    today,
+  ]);
+};
+export const unplanTask = (task: Task) => setPlannedDays(task, []);
 export async function reopenTask(task: Task) {
   const value = await updateTask(task, {
-    status: task.plannedForDate ? "planned" : "inbox",
+    status: taskDays(task).length ? "planned" : "inbox",
     completedAt: null as unknown as undefined,
   });
   await event(task.id, "task_reactivated");
