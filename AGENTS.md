@@ -31,10 +31,12 @@ Functions; OpenAI (via the `planner` Edge Function) for optional AI planning.
 
 - **No commitment cap**: Today holds as many tasks as the user plans. The old
   "max 3 commitments" limit was removed on purpose; do not reintroduce it.
-- **Quick Add flow**: `captureTask` creates `status: "inbox"` with no
-  `plannedForDate`. Day-less, project-less active tasks are "Quick Add" and
-  appear at the bottom of Today and Plan until the user gives them a day
-  (`planTask`) — there is no separate Inbox page anymore.
+- **Quick Add flow**: capture asks "when?" (Today / Pick a date via
+  [MonthCalendar](src/components/MonthCalendar.tsx) / Set aside), not
+  priority — priority defaults to 3 and is edited in TaskDetail.
+  `captureTask` creates `status: "inbox"` with no `plannedForDate`; day-less,
+  project-less active tasks are "Quick Add" and appear at the bottom of Today
+  and Plan until the user gives them a day — there is no Inbox page anymore.
 - **Multi-day planning**: a task can be scheduled onto several work days.
   `plannedForDates` (sorted array, server column `planned_for_dates` jsonb)
   holds them all; `plannedForDate` stays the first day for index/sync compat.

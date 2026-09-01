@@ -1,5 +1,10 @@
 import { useId, useState, type FormEvent } from "react";
-import { captureTask } from "../lib/repository";
+import { captureTask, setPlannedDays } from "../lib/repository";
+import { todayKey } from "../lib/ids";
+import { MonthCalendar } from "./MonthCalendar";
+
+type Stage = "input" | "schedule" | "calendar";
+
 export function Capture({
   compact = false,
   inputId,
@@ -10,17 +15,18 @@ export function Capture({
   const autoId = useId();
   const fieldId = inputId ?? autoId;
   const [title, setTitle] = useState("");
-  const [choosingPriority, setChoosingPriority] = useState(false);
+  const [stage, setStage] = useState<Stage>("input");
   const [saved, setSaved] = useState(false);
-  async function submit(e: FormEvent) {
+  function submit(e: FormEvent) {
     e.preventDefault();
     if (!title.trim()) return;
-    setChoosingPriority(true);
+    setStage("schedule");
   }
-  async function save(priority: 1 | 2 | 3 | 4) {
-    await captureTask(title, { priority });
+  async function save(days: string[]) {
+    const task = await captureTask(title);
+    if (days.length) await setPlannedDays(task, days);
     setTitle("");
-    setChoosingPriority(false);
+    setStage("input");
     setSaved(true);
     setTimeout(() => setSaved(false), 1800);
   }
@@ -28,13 +34,13 @@ export function Capture({
     <form
       onSubmit={submit}
       className={
-        compact ? "flex gap-2" : "rounded-3xl bg-white p-4 shadow-soft"
+        compact ? "flex flex-wrap gap-2" : "rounded-3xl bg-white p-4 shadow-soft"
       }
     >
       <label className="sr-only" htmlFor={fieldId}>
         Capture an item
       </label>
-      {!choosingPriority ? (
+      {stage === "input" && (
         <>
           <input
             id={fieldId}
@@ -47,31 +53,48 @@ export function Capture({
             {saved ? "Saved" : "Capture"}
           </button>
         </>
-      ) : (
+      )}
+      {stage === "schedule" && (
         <fieldset className="w-full">
           <legend className="mb-2 text-sm font-semibold">
-            Priority for “{title.trim()}”
+            When will you do “{title.trim()}”?
           </legend>
-          <div className="grid grid-cols-4 gap-2">
-            {(
-              [
-                [1, "Urgent"],
-                [2, "High"],
-                [3, "Normal"],
-                [4, "Low"],
-              ] as const
-            ).map(([priority, label]) => (
-              <button
-                type="button"
-                key={priority}
-                onClick={() => void save(priority)}
-                className={priority === 3 ? "primary px-2" : "secondary px-2"}
-              >
-                {compact ? `P${priority}` : label}
-              </button>
-            ))}
+          <div className="grid grid-cols-3 gap-2">
+            <button
+              type="button"
+              onClick={() => void save([todayKey()])}
+              className="primary px-2"
+            >
+              Today
+            </button>
+            <button
+              type="button"
+              onClick={() => setStage("calendar")}
+              className="secondary px-2"
+            >
+              Pick a date
+            </button>
+            <button
+              type="button"
+              onClick={() => void save([])}
+              className="secondary px-2"
+            >
+              Set aside
+            </button>
           </div>
         </fieldset>
+      )}
+      {stage === "calendar" && (
+        <div className="w-full">
+          <MonthCalendar selected={[]} onToggle={(day) => void save([day])} />
+          <button
+            type="button"
+            onClick={() => setStage("schedule")}
+            className="mt-2 text-sm font-semibold text-slate-500 hover:text-ink"
+          >
+            ‹ Back
+          </button>
+        </div>
       )}
     </form>
   );

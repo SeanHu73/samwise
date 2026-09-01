@@ -1,5 +1,5 @@
 import { useLiveQuery } from "dexie-react-hooks";
-import { X } from "lucide-react";
+import { Check, X } from "lucide-react";
 import { db } from "../lib/db";
 import {
   completeTask,
@@ -10,6 +10,7 @@ import {
   updateTask,
 } from "../lib/repository";
 import { taskDays } from "../lib/taskDays";
+import { MonthCalendar } from "./MonthCalendar";
 import { useActiveAreas, useProjects } from "../hooks/useData";
 import { AutoSaveText } from "./AutoSaveText";
 import { priorityLabels } from "../lib/priority";
@@ -116,18 +117,20 @@ export function TaskDetail({
               ))}
             </div>
           )}
-          <input
-            className="field"
-            type="date"
-            value=""
-            aria-label="Add a planned day"
-            onChange={(event) =>
-              event.target.value &&
-              void setPlannedDays(task, [...days, event.target.value])
+          <MonthCalendar
+            selected={days}
+            onToggle={(day) =>
+              void setPlannedDays(
+                task,
+                days.includes(day)
+                  ? days.filter((d) => d !== day)
+                  : [...days, day],
+              )
             }
           />
           <p className="mt-1 text-xs font-normal text-slate-500">
-            Pick a date to add a work day; a task can have several.
+            Tap days to add or remove them — a task can have several work
+            days.
           </p>
         </fieldset>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -193,10 +196,10 @@ export function TaskDetail({
           }
         />
         <div className="mt-6 flex flex-wrap items-center justify-between gap-2">
-          <div className="flex gap-2">
+          <div className="flex gap-1">
             <button
               type="button"
-              className="min-h-11 rounded-xl px-4 text-clay hover:bg-clay/10"
+              className="min-h-11 rounded-xl px-3 text-clay hover:bg-clay/10"
               onClick={() => {
                 if (window.confirm(`Delete “${task.title}”?`)) {
                   void deleteTask(task);
@@ -208,38 +211,44 @@ export function TaskDetail({
             </button>
             <button
               type="button"
-              className="min-h-11 rounded-xl px-4 text-slate-600 hover:bg-sand/60"
+              className="min-h-11 rounded-xl px-3 text-slate-600 hover:bg-sand/60"
               onClick={() => {
                 void dropTask(task);
                 onClose();
               }}
             >
-              Drop it
+              Drop
             </button>
           </div>
-          {task.status === "done" ? (
-            <button
-              type="button"
-              className="primary"
-              onClick={() => {
-                void reopenTask(task);
-                onClose();
-              }}
-            >
-              Reopen
+          <div className="flex gap-2">
+            {task.status === "done" ? (
+              <button
+                type="button"
+                className="secondary"
+                onClick={() => {
+                  void reopenTask(task);
+                  onClose();
+                }}
+              >
+                Reopen task
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="secondary inline-flex items-center gap-1.5"
+                onClick={() => {
+                  void completeTask(task);
+                  onClose();
+                }}
+              >
+                <Check size={16} />
+                Complete task
+              </button>
+            )}
+            <button type="button" className="primary" onClick={onClose}>
+              Done
             </button>
-          ) : (
-            <button
-              type="button"
-              className="primary"
-              onClick={() => {
-                void completeTask(task);
-                onClose();
-              }}
-            >
-              Mark done
-            </button>
-          )}
+          </div>
         </div>
       </div>
     </div>
