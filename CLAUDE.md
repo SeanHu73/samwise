@@ -4,6 +4,16 @@ A local-first PWA day planner ("a steady companion"). React 19 + Vite + Tailwind
 + Dexie (IndexedDB) on the client; Supabase for auth, sync, storage, and Edge
 Functions; OpenAI (via the `planner` Edge Function) for optional AI planning.
 
+## At the start of every session
+
+Read [IDEAS.md](IDEAS.md) — the user's backlog of changes they want for the
+app. Bring it up unprompted early in the session: ask whether the in-app
+Workshop page (`/ideas`) has new entries to paste in (that page lives in the
+user's synced database, which you cannot read — its "Copy for Claude" button
+puts the text on their clipboard), then propose how open items could be
+integrated (or argue why they shouldn't be), and keep IDEAS.md's sections
+up to date as items are discussed, decided, and built.
+
 ## Commands
 
 - `npm run dev` — Vite dev server

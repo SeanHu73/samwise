@@ -3,6 +3,7 @@ import { Layout } from "./components/Layout";
 import { Today } from "./pages/Today";
 import { AllTasks } from "./pages/AllTasks";
 import { Completed } from "./pages/Completed";
+import { Ideas } from "./pages/Ideas";
 import { Focus } from "./pages/Focus";
 import { BigPicture, BigPictureDetail } from "./pages/BigPicture";
 import {
@@ -29,6 +30,7 @@ export default function App() {
         <Route path="/insights" element={<Insights />} />
         <Route path="/assistant" element={<Assistant />} />
         <Route path="/calendar" element={<Calendar />} />
+        <Route path="/ideas" element={<Ideas />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="*" element={<Navigate to="/today" replace />} />
       </Route>

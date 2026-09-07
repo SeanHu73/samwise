@@ -305,6 +305,44 @@ export async function logTimer(task: Task, minutes: number) {
   if (minutes > 0) await event(task.id, "actual_time_logged", { minutes });
 }
 
+// Fixed ids so every device converges on one shared "app ideas" doc.
+export const IDEAS_PROJECT_ID = "5a11a5e5-0000-4000-8000-1dea50f5a153";
+export const IDEAS_NOTE_ID = "5a11a5e5-0001-4000-8000-1dea50f5a153";
+let ideasNoteRequest: Promise<Note> | undefined;
+export function getIdeasNote() {
+  if (ideasNoteRequest) return ideasNoteRequest;
+  ideasNoteRequest = (async () => {
+    const existing = await db.notes.get(IDEAS_NOTE_ID);
+    if (existing) return existing;
+    if (!(await db.projects.get(IDEAS_PROJECT_ID))) {
+      const project: Project = {
+        ...base(),
+        id: IDEAS_PROJECT_ID,
+        title: "Samwise itself",
+        purpose: "Ideas for improving this app.",
+        definitionOfDone: "",
+        type: "explore",
+        status: "paused",
+      };
+      await db.projects.add(project);
+      await queue("project", project);
+    }
+    const note: Note = {
+      ...base(),
+      id: IDEAS_NOTE_ID,
+      projectId: IDEAS_PROJECT_ID,
+      title: "Ideas for Samwise",
+      markdownContent: "",
+    };
+    await db.notes.add(note);
+    await queue("note", note);
+    return note;
+  })().finally(() => {
+    ideasNoteRequest = undefined;
+  });
+  return ideasNoteRequest;
+}
+
 let planningProfileRequest: Promise<PlanningProfile> | undefined;
 export function getPlanningProfile() {
   if (planningProfileRequest) return planningProfileRequest;

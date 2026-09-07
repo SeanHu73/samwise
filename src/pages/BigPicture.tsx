@@ -9,6 +9,7 @@ import {
   createAgentRun,
   createMilestone,
   createProject,
+  IDEAS_PROJECT_ID,
   updateMilestone,
   updateProject,
 } from "../lib/repository";
@@ -71,7 +72,7 @@ interface Advice {
 }
 
 export function BigPicture() {
-  const projects = useProjects(),
+  const projects = useProjects().filter((p) => p.id !== IDEAS_PROJECT_ID),
     tasks = useTasks(),
     areas = useAreas(),
     milestones = useLiveQuery(

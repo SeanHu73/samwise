@@ -5,6 +5,7 @@ import {
   CheckCircle2,
   Compass,
   FolderKanban,
+  Lightbulb,
   ListTodo,
   Map,
   MoreHorizontal,
@@ -30,6 +31,7 @@ const nav = [
   ["/insights", "Insights", BarChart3],
   ["/assistant", "Plan with Samwise", Sparkles],
   ["/calendar", "Calendar", Compass],
+  ["/ideas", "Workshop", Lightbulb],
   ["/settings", "Settings", Settings],
 ] as const;
 export function Layout() {

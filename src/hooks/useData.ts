@@ -2,7 +2,11 @@ import { useEffect } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../lib/db";
 import { todayKey } from "../lib/ids";
-import { getPlanningProfile } from "../lib/repository";
+import {
+  getIdeasNote,
+  getPlanningProfile,
+  IDEAS_NOTE_ID,
+} from "../lib/repository";
 import { isOverflow, taskDays, taskOnDay } from "../lib/taskDays";
 import type { Task } from "../types";
 
@@ -99,6 +103,12 @@ export const useTaskEvents = () =>
   useLiveQuery(() => db.taskEvents.orderBy("occurredAt").toArray(), [], []);
 export const useCalendarEvents = () =>
   useLiveQuery(() => db.calendarEvents.orderBy("startAt").toArray(), [], []);
+export function useIdeasNote() {
+  useEffect(() => {
+    void getIdeasNote();
+  }, []);
+  return useLiveQuery(() => db.notes.get(IDEAS_NOTE_ID), [], undefined);
+}
 export function usePlanningProfile() {
   useEffect(() => {
     void getPlanningProfile();
